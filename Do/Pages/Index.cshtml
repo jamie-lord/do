@@ -1,4 +1,8 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using System.Runtime.Serialization.Json;
+@using System.IO;
+@using System.Text;
 @using Models;
 
 <h2>Add new task</h2>
@@ -77,92 +81,127 @@
     </div>
 }
 
+<button @onclick(GetItems)>Update</button>
+
+<script>
+    Blazor.registerFunction('getFromLocal', (d) => {
+        return localStorage['do'];
+    });
+
+    Blazor.registerFunction('storeInLocal', (data) => {
+        localStorage['do'] = data;
+        return true;
+    });
+</script>
+
 @functions {
-    private List<TaskItem> _todoItems;
+private List<TaskItem> _todoItems;
 
-    public List<TaskItem> TodoItems
+public List<TaskItem> TodoItems
+{
+    get
     {
-        get
+        if (_todoItems == null)
         {
-            if (_todoItems == null)
-            {
-                _todoItems = new List<TaskItem>();
-            }
-            return _todoItems;
+            _todoItems = new List<TaskItem>();
         }
-        set { _todoItems = value; }
+        return _todoItems;
     }
+    set { _todoItems = value; }
+}
 
-    public string CurrentInput { get; set; } = null;
+public string CurrentInput { get; set; } = null;
 
-    public TaskItem CurrentItem { get; set; } = null;
+public TaskItem CurrentItem { get; set; } = null;
 
-    public string InputButtonText { get; private set; } = "Save";
+public string InputButtonText { get; private set; } = "Save";
 
-    public void AddItem()
+public void StoreItems()
+{
+    var s = JsonUtil.Serialize(TodoItems.ToArray());
+    RegisteredFunction.Invoke<bool>("storeInLocal", s);
+}
+
+public void GetItems()
+{
+    var r = RegisteredFunction.Invoke<object>("getFromLocal", 'd');
+    if (r == null)
     {
-        InputButtonText = "Save";
-        if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
-        {
-            return;
-        }
-        try
-        {
-            // Editing existing task
-            if (CurrentItem != null)
-            {
-                CurrentItem.FromLine(CurrentInput);
-            }
-            // New task
-            else
-            {
-                var t = new TaskItem();
-                t.FromLine(CurrentInput);
-                t.Creation = DateTime.Now;
-                TodoItems.Add(t);
-            }
-            CurrentInput = null;
-            CurrentItem = null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
+        return;
     }
+    Console.WriteLine(r.ToString());
 
-    public void Complete(TaskItem item)
+    var s = JsonUtil.Deserialize<TaskItem[]>(r.ToString());
+    TodoItems = s.ToList();
+}
+
+public void AddItem()
+{
+    InputButtonText = "Save";
+    if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
     {
-        item.Complete();
+        return;
     }
-
-    public void Edit(TaskItem item)
+    try
     {
-        CurrentItem = item;
-        CurrentInput = CurrentItem.TodoLine;
-        InputButtonText = "Update";
-    }
-
-    public void Delete(TaskItem item)
-    {
-        try
+        // Editing existing task
+        if (CurrentItem != null)
         {
-            if (CurrentItem == item)
-            {
-                CurrentItem = null;
-                CurrentInput = null;
-            }
-            TodoItems.Remove(item);
+            CurrentItem.FromLine(CurrentInput);
         }
-        catch (Exception ex)
+        // New task
+        else
         {
-            Console.WriteLine(ex);
+            var t = new TaskItem();
+            t.FromLine(CurrentInput);
+            t.Creation = DateTime.Now;
+            TodoItems.Add(t);
         }
-    }
-
-    public void ClearInput()
-    {
         CurrentInput = null;
         CurrentItem = null;
-        InputButtonText = "Save";
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex);
+    }
+    StoreItems();
+}
+
+public void Complete(TaskItem item)
+{
+    item.Complete();
+    StoreItems();
+}
+
+public void Edit(TaskItem item)
+{
+    CurrentItem = item;
+    CurrentInput = CurrentItem.TodoLine();
+    InputButtonText = "Update";
+}
+
+public void Delete(TaskItem item)
+{
+    try
+    {
+        if (CurrentItem == item)
+        {
+            CurrentItem = null;
+            CurrentInput = null;
+        }
+        TodoItems.Remove(item);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex);
+    }
+    StoreItems();
+}
+
+public void ClearInput()
+{
+    CurrentInput = null;
+    CurrentItem = null;
+    InputButtonText = "Save";
+}
 }

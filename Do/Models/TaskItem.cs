@@ -1,15 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Do.Models
 {
-    public class TaskItem : TodoItem
+    public class TaskItem
     {
-        public string TodoLine
+        public string Body { get; set; }
+        public bool Completed { get; set; }
+        public DateTime? Completion { get; set; }
+        public List<string> Context { get; set; } = new List<string>();
+        public DateTime? Creation { get; set; }
+        public Dictionary<string, string> Meta { get; set; } = new Dictionary<string, string>();
+        public string Priority { get; set; }
+        public List<string> Project { get; set; } = new List<string>();
+
+        public string TodoLine()
         {
-            get
-            {
-                return TodoTxt.GenerateTodoLine(this);
-            }
+            return TodoTxt.GenerateTodoLine(this);
         }
 
         public void FromLine(string line)
@@ -23,7 +30,6 @@ namespace Do.Models
             Meta = t.Meta;
             Priority = t.Priority;
             Project = t.Project;
-            Console.WriteLine(Creation);
         }
 
         public void Update(string line)
@@ -43,7 +49,6 @@ namespace Do.Models
             {
                 Creation = t.Creation;
             }
-            Console.WriteLine(Creation);
             Meta = t.Meta;
             Priority = t.Priority;
             Project = t.Project;

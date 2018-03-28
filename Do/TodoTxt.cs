@@ -1,21 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Do.Models;
+using System;
 using System.Text.RegularExpressions;
 
 namespace Do
 {
-    public class TodoItem
-    {
-        public string Body;
-        public bool Completed;
-        public DateTime? Completion;
-        public List<string> Context = new List<string>();
-        public DateTime? Creation;
-        public Dictionary<string, string> Meta = new Dictionary<string, string>();
-        public char Priority;
-        public List<string> Project = new List<string>();
-    }
-
     public static class TodoTxt
     {
         /// <summary>
@@ -23,9 +11,9 @@ namespace Do
         /// </summary>
         /// <param name="line">String line</param>
         /// <returns>TodoItem</returns>
-        public static TodoItem Parse(string line)
+        public static TaskItem Parse(string line)
         {
-            var entry = new TodoItem();
+            var entry = new TaskItem();
             // Completed
             if (Regex.IsMatch(line, "^x (.*)$"))
             {
@@ -42,7 +30,7 @@ namespace Do
             if (Regex.IsMatch(line, "^\\(.\\) (.*)$"))
             {
                 var priority = Regex.Match(line, "^\\((.)\\)");
-                entry.Priority = priority.Groups[1].ToString()[0];
+                entry.Priority = priority.Groups[1].ToString();
                 line = Regex.Replace(line, "^\\(.\\) (.*)$", "$1");
             }
 
@@ -64,19 +52,19 @@ namespace Do
                 line = Regex.Replace(line, "^.{4}-.{2}-.{2} (.*)$", "$1");
             }
 
-            // Context
+            //// Context
             foreach (var item in Regex.Matches(line, "@([^\\s]*)"))
                 entry.Context.Add(item.ToString().Replace("@", "").Trim());
 
             line = Regex.Replace(line, "@([^\\s]*)", "").Trim();
 
-            // Project
+            //// Project
             foreach (var item in Regex.Matches(line, "\\+([^\\s]*)"))
                 entry.Project.Add(item.ToString().Replace("+", "").Trim());
 
             line = Regex.Replace(line, "\\+([^\\s]*)", "").Trim();
 
-            // Meta
+            //// Meta
             foreach (var item in Regex.Matches(line, "([^\\s]*?)\\:([^\\s]*)"))
             {
                 var result = Regex.Match(item.ToString(), "([^\\s]*?)\\:([^\\s]*)");
@@ -95,12 +83,17 @@ namespace Do
         /// </summary>
         /// <param name="item">TodoItem to process</param>
         /// <returns>String representation of the TodoItem</returns>
-        public static string GenerateTodoLine(TodoItem item)
+        public static string GenerateTodoLine(TaskItem item)
         {
             var output = "";
 
             // Completion marker
             if (item.Completed) output += "x ";
+
+            if (!string.IsNullOrWhiteSpace(item.Priority))
+            {
+                output += "(" + item.Priority + ") ";
+            }
 
             if (item.Completion.HasValue)
             {
@@ -114,13 +107,13 @@ namespace Do
 
             output += item.Body + " ";
 
-            // Context
+            //// Context
             foreach (var context in item.Context) output += "@" + context + " ";
 
-            // Project
+            //// Project
             foreach (var project in item.Project) output += "+" + project + " ";
 
-            // Meta
+            //// Meta
             foreach (var meta in item.Meta) output += meta.Key + ":" + meta.Value + " ";
 
             return output.Trim();
