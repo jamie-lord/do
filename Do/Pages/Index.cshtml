@@ -104,7 +104,6 @@
             }
             return _todoItems;
         }
-        set { _todoItems = value; }
     }
 
     public string CurrentInput { get; set; } = null;
@@ -129,7 +128,7 @@
             return;
         }
         var s = JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
-        TodoItems = s;
+        _todoItems = s;
     }
 
     public void AddItem()
