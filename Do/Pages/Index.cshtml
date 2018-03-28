@@ -84,12 +84,12 @@
 <button @onclick(GetItems)>Update</button>
 
 <script>
-    Blazor.registerFunction('getFromLocal', (d) => {
-        return localStorage['do'];
+    Blazor.registerFunction('getFromLocal', (key) => {
+        return localStorage[key];
     });
 
-    Blazor.registerFunction('storeInLocal', (data) => {
-        localStorage['do'] = data;
+    Blazor.registerFunction('storeInLocal', (key, data) => {
+        localStorage[key] = data;
         return true;
     });
 </script>
@@ -119,18 +119,18 @@ public string InputButtonText { get; private set; } = "Save";
 public void StoreItems()
 {
     var s = JsonUtil.Serialize(TodoItems.ToArray());
-    RegisteredFunction.Invoke<bool>("storeInLocal", s);
+    RegisteredFunction.Invoke<bool>("storeInLocal", new object[] { TODO_KEY, s });
 }
+
+private const string TODO_KEY = "do";
 
 public void GetItems()
 {
-    var r = RegisteredFunction.Invoke<object>("getFromLocal", 'd');
+    var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
     if (r == null)
     {
         return;
     }
-    Console.WriteLine(r.ToString());
-
     var s = JsonUtil.Deserialize<TaskItem[]>(r.ToString());
     TodoItems = s.ToList();
 }
