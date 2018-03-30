@@ -1,7 +1,10 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Blazor.Browser.Interop;
-@using System.Threading;
 @using Models;
+
+<label class="btn btn-default btn-file navbar-btn" id="import-button">Import<input type="file" style="display: none;"></label>
+
+<button class="btn btn-default" @onclick(Export)>Export</button>
 
 <h2>Add new task</h2>
 
@@ -79,6 +82,7 @@
     </div>
 }
 
+<script type="text/javascript" src="js/filesaver-1.3.2.min.js"></script>
 <script>
     Blazor.registerFunction('getFromLocal', (key) => {
         return localStorage[key];
@@ -86,6 +90,14 @@
 
     Blazor.registerFunction('storeInLocal', (key, data) => {
         localStorage[key] = data;
+        return true;
+    });
+
+    Blazor.registerFunction('saveToFile', (content) => {
+        var file = new File(content, 'do-' + new Date().toISOString() + '.txt', {
+            type: "text/plain;charset=utf-8"
+        });
+        saveAs(file);
         return true;
     });
 </script>
@@ -217,5 +229,32 @@
         CurrentInput = null;
         CurrentItem = null;
         InputButtonText = "Save";
+    }
+
+    public void Import(object data)
+    {
+        Console.WriteLine(data);
+    }
+
+    public void Export()
+    {
+        if (TodoItems == null || TodoItems.Count < 1)
+        {
+            return;
+        }
+        var output = new List<string>();
+        foreach (var item in TodoItems)
+        {
+            var l = item.TodoLine();
+            if (!string.IsNullOrWhiteSpace(l))
+            {
+                output.Add(l + "\n");
+            }
+        }
+        if (output.Count < 1)
+        {
+            return;
+        }
+        RegisteredFunction.Invoke<bool>("saveToFile", new object[] { output });
     }
 }
