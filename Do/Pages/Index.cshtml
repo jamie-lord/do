@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using System.Threading;
 @using Models;
 
 <h2>Add new task</h2>
@@ -78,8 +79,6 @@
     </div>
 }
 
-<button @onclick(GetItems)>Update</button>
-
 <script>
     Blazor.registerFunction('getFromLocal', (key) => {
         return localStorage[key];
@@ -104,6 +103,10 @@
             }
             return _todoItems;
         }
+        private set
+        {
+            _todoItems = value;
+        }
     }
 
     public string CurrentInput { get; set; } = null;
@@ -114,21 +117,36 @@
 
     private const string TODO_KEY = "do";
 
-    public void StoreItems()
+    protected override async Task OnInitAsync()
+    {
+        new Task(() => {
+            TodoItems = GetTasksFromLocalStorage();
+        }).Start();
+    }
+
+    private void SaveItemsInLocalStorage()
     {
         var s = JsonUtil.Serialize(TodoItems);
         RegisteredFunction.Invoke<bool>("storeInLocal", new object[] { TODO_KEY, s });
     }
 
-    public void GetItems()
+    private List<TaskItem> GetTasksFromLocalStorage()
     {
         var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
+        Console.WriteLine(r.ToString());
         if (r == null)
         {
-            return;
+            return new List<TaskItem>();
         }
-        var s = JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
-        _todoItems = s;
+        try
+        {
+            return JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return new List<TaskItem>();
+        }
     }
 
     public void AddItem()
@@ -160,13 +178,13 @@
         {
             Console.WriteLine(ex);
         }
-        StoreItems();
+        SaveItemsInLocalStorage();
     }
 
     public void Complete(TaskItem item)
     {
         item.Complete();
-        StoreItems();
+        SaveItemsInLocalStorage();
     }
 
     public void Edit(TaskItem item)
@@ -191,7 +209,7 @@
         {
             Console.WriteLine(ex);
         }
-        StoreItems();
+        SaveItemsInLocalStorage();
     }
 
     public void ClearInput()
