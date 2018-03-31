@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using System.IO;
 @using Models;
 
 <label class="btn btn-default btn-file navbar-btn" id="import-button">Import<input type="file" style="display: none;"></label>
@@ -20,7 +21,7 @@
     </div>
 </div>
 
-@if (TodoItems.Any(x => !x.Completed))
+@if (TodoItems != null && TodoItems.Any(x => !x.Completed))
 {
     <h1>Your tasks</h1>
 
@@ -34,9 +35,8 @@
             @foreach (var item in itemsForProject)
             {
                 <div class="list-group-item">
-                    <h4 class="list-group-item-heading">@item.Body</h4>
-                    <p class="list-group-item-text">
-                        @item.Creation?.ToString("yyyy-MM-dd")
+                    <h4 class="list-group-item-heading">
+                        @item.Body
                         @if (item.Context != null && item.Context.Count > 0)
                         {
                             foreach (var context in item.Context)
@@ -44,6 +44,9 @@
                                 <span class="label label-default">@context</span>
                             }
                         }
+                    </h4>
+                    <p class="list-group-item-text">
+                        @item.Creation?.ToString("yyyy-MM-dd")
                     </p>
                     <button class="btn btn-success" @onclick(() => { Complete(item); })><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button>
                     <button class="btn btn-default" @onclick(() => { Edit(item); })><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>
@@ -54,7 +57,7 @@
     }
 }
 
-@if (TodoItems.Any(x => x.Completed))
+@if (TodoItems != null && TodoItems.Any(x => x.Completed))
 {
     <h1>Completed tasks</h1>
 
@@ -100,32 +103,40 @@
         saveAs(file);
         return true;
     });
+
+    document.getElementById('import-button').addEventListener('change', function () {
+        let file = this.children[0].files[0];
+        let reader = new FileReader();
+        reader.onloadend = function callback(e) {
+            let result = e.target.result;
+            const assemblyName = 'Do';
+            const namespace = 'Do.Pages';
+            const typeName = 'Index';
+            const methodName = 'Import';
+
+            const importMethod = Blazor.platform.findMethod(
+                assemblyName,
+                namespace,
+                typeName,
+                methodName
+            );
+
+            let data = Blazor.platform.toDotNetString(result);
+
+            let resultAsDotNetString = Blazor.platform.callMethod(importMethod, null, [data]);
+        };
+        reader.readAsText(file);
+    });
 </script>
 
 @functions {
-    private List<TaskItem> _todoItems;
+    public static List<TaskItem> TodoItems;
 
-    public List<TaskItem> TodoItems
-    {
-        get
-        {
-            if (_todoItems == null)
-            {
-                _todoItems = new List<TaskItem>();
-            }
-            return _todoItems;
-        }
-        private set
-        {
-            _todoItems = value;
-        }
-    }
+    public static string CurrentInput { get; set; } = null;
 
-    public string CurrentInput { get; set; } = null;
+    public static TaskItem CurrentItem { get; set; } = null;
 
-    public TaskItem CurrentItem { get; set; } = null;
-
-    public string InputButtonText { get; private set; } = "Save";
+    public static string InputButtonText { get; private set; } = "Save";
 
     private const string TODO_KEY = "do";
 
@@ -137,13 +148,17 @@
         }).Start();
     }
 
-    private void SaveItemsInLocalStorage()
+    private static void SaveItemsInLocalStorage()
     {
+        if (TodoItems == null)
+        {
+            return;
+        }
         var s = JsonUtil.Serialize(TodoItems);
         RegisteredFunction.Invoke<bool>("storeInLocal", new object[] { TODO_KEY, s });
     }
 
-    private List<TaskItem> GetTasksFromLocalStorage()
+    private static List<TaskItem> GetTasksFromLocalStorage()
     {
         var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
         if (r == null)
@@ -161,7 +176,7 @@
         }
     }
 
-    public void AddItem()
+    public static void AddItem()
     {
         InputButtonText = "Save";
         if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
@@ -193,20 +208,20 @@
         SaveItemsInLocalStorage();
     }
 
-    public void Complete(TaskItem item)
+    public static void Complete(TaskItem item)
     {
         item.Complete();
         SaveItemsInLocalStorage();
     }
 
-    public void Edit(TaskItem item)
+    public static void Edit(TaskItem item)
     {
         CurrentItem = item;
         CurrentInput = CurrentItem.TodoLine();
         InputButtonText = "Update";
     }
 
-    public void Delete(TaskItem item)
+    public static void Delete(TaskItem item)
     {
         try
         {
@@ -224,19 +239,47 @@
         SaveItemsInLocalStorage();
     }
 
-    public void ClearInput()
+    public static void ClearInput()
     {
         CurrentInput = null;
         CurrentItem = null;
         InputButtonText = "Save";
     }
 
-    public void Import(object data)
+    public static void Import(string fileData)
     {
-        Console.WriteLine(data);
+        if (string.IsNullOrWhiteSpace(fileData))
+        {
+            return;
+        }
+        var items = new List<TaskItem>();
+        using (StringReader reader = new StringReader(fileData))
+        {
+            string line;
+            while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+            {
+                try
+                {
+                    var i = TodoTxt.Parse(line);
+                    if (i != null)
+                    {
+                        items.Add(i);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+        }
+        if (items.Count > 0)
+        {
+            TodoItems = items;
+            SaveItemsInLocalStorage();
+        }
     }
 
-    public void Export()
+    public static void Export()
     {
         if (TodoItems == null || TodoItems.Count < 1)
         {
