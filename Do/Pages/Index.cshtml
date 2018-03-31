@@ -131,7 +131,8 @@
 
     protected override async Task OnInitAsync()
     {
-        new Task(() => {
+        new Task(() =>
+        {
             TodoItems = GetTasksFromLocalStorage();
         }).Start();
     }
@@ -145,7 +146,6 @@
     private List<TaskItem> GetTasksFromLocalStorage()
     {
         var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
-        Console.WriteLine(r.ToString());
         if (r == null)
         {
             return new List<TaskItem>();
