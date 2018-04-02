@@ -5,7 +5,7 @@
 
 <script defer src="js/fontawesome-all.min.js"></script>
 
-<div class="row">
+<div class="row section-row">
     <div class="col">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand">Do</a>
@@ -44,56 +44,62 @@
 
 @if (TodoItems != null && TodoItems.Any(x => !x.Completed))
 {
-    <div class="row">
+    <div class="row section-row">
         <div class="col">
             <h1>Your tasks</h1>
 
             @foreach (var itemsForProject in TodoItems.Where(x => !x.Completed).OrderBy(x => x.Creation).GroupBy(x => x.Project.FirstOrDefault()))
             {
-                @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
-                {
-                    <h2>@itemsForProject.Key</h2>
-                }
-                <div class="list-group">
-                    @foreach (var item in itemsForProject)
+                <div class="project-group">
+                    @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
                     {
-                        <div class="list-group-item">
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-md-auto">
-                                        <button class="btn btn-outline-success" @onclick(() => { Complete(item); })>
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </div>
+                        <h2>@itemsForProject.Key</h2>
+                    }
+                    <div class="list-group">
+                        @foreach (var item in itemsForProject)
+                        {
+                            <div class="list-group-item">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-md-auto my-auto">
+                                            <button class="btn btn-outline-success" @onclick(() => { Complete(item); })>
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
 
-                                    <div class="col">
-                                        <h4 class="list-group-item-heading">
-                                            @item.Body
-                                            @if (item.Context != null && item.Context.Count > 0)
-                                            {
-                                                foreach (var context in item.Context)
+                                        <div class="col">
+                                            <h4>
+                                                @if (!string.IsNullOrWhiteSpace(item.Priority))
                                                 {
-                                                    <span class="label label-default">@context</span>
+                                                    <span class="badge badge-primary">@item.Priority</span>
                                                 }
-                                            }
-                                        </h4>
-                                        <p class="list-group-item-text">
-                                            @item.Creation?.ToString("yyyy-MM-dd")
-                                        </p>
-                                    </div>
+                                                @item.Body
+                                            </h4>
+                                            <p class="task-meta">
+                                                @item.Creation?.ToString("yyyy-MM-dd")
+                                                @if (item.Context != null && item.Context.Count > 0)
+                                                {
+                                                    foreach (var context in item.Context)
+                                                    {
+                                                        <span class="badge badge-secondary">@context</span>
+                                                    }
+                                                }
+                                            </p>
+                                        </div>
 
-                                    <div class="col-md-auto">
-                                        <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <div class="col-md-auto my-auto">
+                                            <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
             }
         </div>
@@ -102,32 +108,47 @@
 
 @if (TodoItems != null && TodoItems.Any(x => x.Completed))
 {
-    <div class="row">
+    <div class="row section-row">
         <div class="col">
             <h1>Completed tasks</h1>
 
             <div class="list-group">
                 @foreach (var item in TodoItems.Where(x => x.Completed).OrderBy(x => x.Completion))
                 {
-
                     <div class="list-group-item">
-                        <h4 class="list-group-item-heading">@item.Body</h4>
-                        <p class="list-group-item-text">
-                            @item.Creation?.ToString("yyyy-MM-dd")
-                            @if (item.Context != null && item.Context.Count > 0)
-                            {
-                                foreach (var context in item.Context)
-                                {
-                                    <span class="label label-default">@context</span>
-                                }
-                            }
-                        </p>
-                        <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <h4>
+                                        @if (!string.IsNullOrWhiteSpace(item.Priority))
+                                        {
+                                            <span class="badge badge-primary">@item.Priority</span>
+                                        }
+                                        @item.Body
+                                    </h4>
+                                    <p class="task-meta">
+                                        @item.Creation?.ToString("yyyy-MM-dd")
+                                        @item.Completion?.ToString("yyyy-MM-dd")
+                                        @if (item.Context != null && item.Context.Count > 0)
+                                        {
+                                            foreach (var context in item.Context)
+                                            {
+                                                <span class="badge badge-secondary">@context</span>
+                                            }
+                                        }
+                                    </p>
+                                </div>
+
+                                <div class="col-md-auto my-auto">
+                                    <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 }
             </div>
