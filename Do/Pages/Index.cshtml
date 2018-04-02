@@ -3,6 +3,8 @@
 @using System.IO;
 @using Models;
 
+<script defer src="js/fontawesome-all.min.js"></script>
+
 <div class="row">
     <div class="col">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -30,7 +32,9 @@
         <div class="input-group input-group-lg">
             <input type="text" class="form-control" id="taskTextArea" placeholder="Take over the world" @bind(CurrentInput)>
             <div class="input-group-append">
-                <button @onclick(ClearInput) class="btn btn-outline-secondary">Clear</button>
+                <button @onclick(ClearInput) class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i>
+                </button>
                 <button @onclick(AddItem) class="btn btn-outline-primary">@InputButtonText</button>
             </div>
         </div>
@@ -57,7 +61,9 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md-auto">
-                                        <button class="btn btn-outline-success" @onclick(() => { Complete(item); })>Complete</button>
+                                        <button class="btn btn-outline-success" @onclick(() => { Complete(item); })>
+                                            <i class="fas fa-check"></i>
+                                        </button>
                                     </div>
 
                                     <div class="col">
@@ -77,8 +83,12 @@
                                     </div>
 
                                     <div class="col-md-auto">
-                                        <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>Edit</button>
-                                        <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>Delete</button>
+                                        <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -112,8 +122,12 @@
                                 }
                             }
                         </p>
-                        <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>Edit</button>
-                        <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>Delete</button>
+                        <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 }
             </div>
@@ -166,174 +180,174 @@
 </script>
 
 @functions {
-    public static List<TaskItem> TodoItems;
+public static List<TaskItem> TodoItems;
 
-    public static string CurrentInput { get; set; } = null;
+public static string CurrentInput { get; set; } = null;
 
-    public static TaskItem CurrentItem { get; set; } = null;
+public static TaskItem CurrentItem { get; set; } = null;
 
-    public static string InputButtonText { get; private set; } = "Save";
+public static string InputButtonText { get; private set; } = "Save";
 
-    private const string TODO_KEY = "do";
+private const string TODO_KEY = "do";
 
-    protected override async Task OnInitAsync()
+protected override async Task OnInitAsync()
+{
+    new Task(() =>
     {
-        new Task(() =>
-        {
-            TodoItems = GetTasksFromLocalStorage();
-        }).Start();
+        TodoItems = GetTasksFromLocalStorage();
+    }).Start();
+}
+
+private static void SaveItemsInLocalStorage()
+{
+    if (TodoItems == null)
+    {
+        return;
     }
+    var s = JsonUtil.Serialize(TodoItems);
+    RegisteredFunction.Invoke<bool>("storeInLocal", new object[] { TODO_KEY, s });
+}
 
-    private static void SaveItemsInLocalStorage()
+private static List<TaskItem> GetTasksFromLocalStorage()
+{
+    var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
+    if (r == null)
     {
-        if (TodoItems == null)
-        {
-            return;
-        }
-        var s = JsonUtil.Serialize(TodoItems);
-        RegisteredFunction.Invoke<bool>("storeInLocal", new object[] { TODO_KEY, s });
+        return new List<TaskItem>();
     }
-
-    private static List<TaskItem> GetTasksFromLocalStorage()
+    try
     {
-        var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
-        if (r == null)
-        {
-            return new List<TaskItem>();
-        }
-        try
-        {
-            return JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return new List<TaskItem>();
-        }
+        return JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
     }
-
-    public static void AddItem()
+    catch (Exception ex)
     {
-        InputButtonText = "Save";
-        if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
-        {
-            return;
-        }
-        try
-        {
-            // Editing existing task
-            if (CurrentItem != null)
-            {
-                CurrentItem.FromLine(CurrentInput);
-            }
-            // New task
-            else
-            {
-                var t = new TaskItem();
-                t.FromLine(CurrentInput);
-                t.Creation = DateTime.Now;
-                TodoItems.Add(t);
-            }
-            CurrentInput = null;
-            CurrentItem = null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-        SaveItemsInLocalStorage();
+        Console.WriteLine(ex);
+        return new List<TaskItem>();
     }
+}
 
-    public static void Complete(TaskItem item)
+public static void AddItem()
+{
+    InputButtonText = "Save";
+    if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
     {
-        item.Complete();
-        SaveItemsInLocalStorage();
+        return;
     }
-
-    public static void Edit(TaskItem item)
+    try
     {
-        CurrentItem = item;
-        CurrentInput = CurrentItem.TodoLine();
-        InputButtonText = "Update";
-    }
-
-    public static void Delete(TaskItem item)
-    {
-        try
+        // Editing existing task
+        if (CurrentItem != null)
         {
-            if (CurrentItem == item)
-            {
-                CurrentItem = null;
-                CurrentInput = null;
-            }
-            TodoItems.Remove(item);
+            CurrentItem.FromLine(CurrentInput);
         }
-        catch (Exception ex)
+        // New task
+        else
         {
-            Console.WriteLine(ex);
+            var t = new TaskItem();
+            t.FromLine(CurrentInput);
+            t.Creation = DateTime.Now;
+            TodoItems.Add(t);
         }
-        SaveItemsInLocalStorage();
-    }
-
-    public static void ClearInput()
-    {
         CurrentInput = null;
         CurrentItem = null;
-        InputButtonText = "Save";
     }
-
-    public static void Import(string fileData)
+    catch (Exception ex)
     {
-        if (string.IsNullOrWhiteSpace(fileData))
+        Console.WriteLine(ex);
+    }
+    SaveItemsInLocalStorage();
+}
+
+public static void Complete(TaskItem item)
+{
+    item.Complete();
+    SaveItemsInLocalStorage();
+}
+
+public static void Edit(TaskItem item)
+{
+    CurrentItem = item;
+    CurrentInput = CurrentItem.TodoLine();
+    InputButtonText = "Update";
+}
+
+public static void Delete(TaskItem item)
+{
+    try
+    {
+        if (CurrentItem == item)
         {
-            return;
+            CurrentItem = null;
+            CurrentInput = null;
         }
-        var items = new List<TaskItem>();
-        using (StringReader reader = new StringReader(fileData))
+        TodoItems.Remove(item);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex);
+    }
+    SaveItemsInLocalStorage();
+}
+
+public static void ClearInput()
+{
+    CurrentInput = null;
+    CurrentItem = null;
+    InputButtonText = "Save";
+}
+
+public static void Import(string fileData)
+{
+    if (string.IsNullOrWhiteSpace(fileData))
+    {
+        return;
+    }
+    var items = new List<TaskItem>();
+    using (StringReader reader = new StringReader(fileData))
+    {
+        string line;
+        while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
         {
-            string line;
-            while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+            try
             {
-                try
+                var i = TodoTxt.Parse(line);
+                if (i != null)
                 {
-                    var i = TodoTxt.Parse(line);
-                    if (i != null)
-                    {
-                        items.Add(i);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
+                    items.Add(i);
                 }
             }
-        }
-        if (items.Count > 0)
-        {
-            TodoItems = items;
-            SaveItemsInLocalStorage();
-        }
-    }
-
-    public static void Export()
-    {
-        if (TodoItems == null || TodoItems.Count < 1)
-        {
-            return;
-        }
-        var output = new List<string>();
-        foreach (var item in TodoItems)
-        {
-            var l = item.TodoLine();
-            if (!string.IsNullOrWhiteSpace(l))
+            catch (Exception ex)
             {
-                output.Add(l + "\n");
+                Console.WriteLine(ex);
             }
         }
-        if (output.Count < 1)
-        {
-            return;
-        }
-        RegisteredFunction.Invoke<bool>("saveToFile", new object[] { output });
     }
+    if (items.Count > 0)
+    {
+        TodoItems = items;
+        SaveItemsInLocalStorage();
+    }
+}
+
+public static void Export()
+{
+    if (TodoItems == null || TodoItems.Count < 1)
+    {
+        return;
+    }
+    var output = new List<string>();
+    foreach (var item in TodoItems)
+    {
+        var l = item.TodoLine();
+        if (!string.IsNullOrWhiteSpace(l))
+        {
+            output.Add(l + "\n");
+        }
+    }
+    if (output.Count < 1)
+    {
+        return;
+    }
+    RegisteredFunction.Invoke<bool>("saveToFile", new object[] { output });
+}
 }
