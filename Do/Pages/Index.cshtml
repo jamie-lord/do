@@ -113,7 +113,7 @@
             <h1>Completed tasks</h1>
 
             <div class="list-group">
-                @foreach (var item in TodoItems.Where(x => x.Completed).OrderBy(x => x.Completion))
+                @foreach (var item in TodoItems.Where(x => x.Completed).OrderByDescending(x => x.Completion))
                 {
                     <div class="list-group-item">
                         <div class="container">
