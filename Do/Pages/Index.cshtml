@@ -1,9 +1,9 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using Microsoft.JSInterop;
 @using System.IO;
 @using Models;
 
-<script defer src="js/fontawesome-all.min.js"></script>
+@*<script defer src="js/fontawesome-all.min.js"></script>*@
 
 <div class="row section-row">
     <div class="col">
@@ -19,7 +19,7 @@
                         <label class="nav-link btn" style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn" @onclick(Export)>Export</a>
+                        <a class="nav-link btn" onclick="@Export">Export</a>
                     </li>
                 </ul>
             </div>
@@ -30,12 +30,12 @@
 <div class="row">
     <div class="col">
         <div class="input-group input-group-lg">
-            <input type="text" class="form-control" id="taskTextArea" placeholder="Take over the world" @bind(CurrentInput)>
+            <input type="text" class="form-control" id="taskTextArea" placeholder="Take over the world" bind="@CurrentInput" />
             <div class="input-group-append">
-                <button @onclick(ClearInput) class="btn btn-outline-secondary">
+                <button onclick="@ClearInput" class="btn btn-outline-secondary">
                     <i class="fas fa-times"></i>
                 </button>
-                <button @onclick(AddItem) class="btn btn-outline-primary">@InputButtonText</button>
+                <button onclick="@AddItem" class="btn btn-outline-primary">@InputButtonText</button>
             </div>
         </div>
     </div>
@@ -62,7 +62,7 @@
                                 <div class="container">
                                     <div class="row">
                                         <div class="col-md-auto my-auto">
-                                            <button class="btn btn-outline-success" @onclick(() => { Complete(item); })>
+                                            <button class="btn btn-outline-success" onclick="@(() => { Complete(item); })">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         </div>
@@ -88,10 +88,10 @@
                                         </div>
 
                                         <div class="col-md-auto my-auto">
-                                            <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
+                                            <button class="btn btn-outline-secondary" onclick="@(() => { Edit(item); })">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
+                                            <button class="btn btn-outline-danger" onclick="@(() => { Delete(item); })">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -140,10 +140,10 @@
                                 </div>
 
                                 <div class="col-md-auto my-auto">
-                                    <button class="btn btn-outline-secondary" @onclick(() => { Edit(item); })>
+                                    <button class="btn btn-outline-secondary" onclick="@(() => { Edit(item); })">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger" @onclick(() => { Delete(item); })>
+                                    <button class="btn btn-outline-danger" onclick="@(() => { Delete(item); })">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -156,219 +156,172 @@
     </div>
 }
 
-<script type="text/javascript" src="js/filesaver-1.3.2.min.js"></script>
-<script>
-    Blazor.registerFunction('getFromLocal', (key) => {
-        return localStorage[key];
-    });
-
-    Blazor.registerFunction('storeInLocal', (key, data) => {
-        localStorage[key] = data;
-        return true;
-    });
-
-    Blazor.registerFunction('saveToFile', (content) => {
-        var file = new File(content, 'do-' + new Date().toISOString() + '.txt', {
-            type: "text/plain;charset=utf-8"
-        });
-        saveAs(file);
-        return true;
-    });
-
-    document.getElementById('import-button').addEventListener('change', function () {
-        let file = this.children[0].files[0];
-        let reader = new FileReader();
-        reader.onloadend = function callback(e) {
-            let result = e.target.result;
-            const assemblyName = 'Do';
-            const namespace = 'Do.Pages';
-            const typeName = 'Index';
-            const methodName = 'Import';
-
-            const importMethod = Blazor.platform.findMethod(
-                assemblyName,
-                namespace,
-                typeName,
-                methodName
-            );
-
-            let data = Blazor.platform.toDotNetString(result);
-
-            let resultAsDotNetString = Blazor.platform.callMethod(importMethod, null, [data]);
-        };
-        reader.readAsText(file);
-    });
-</script>
-
 @functions {
-public static List<TaskItem> TodoItems;
+    public List<TaskItem> TodoItems;
 
-public static string CurrentInput { get; set; } = null;
+    public string CurrentInput { get; set; } = null;
 
-public static TaskItem CurrentItem { get; set; } = null;
+    public TaskItem CurrentItem { get; set; } = null;
 
-public static string InputButtonText { get; private set; } = "Save";
+    public string InputButtonText { get; private set; } = "Save";
 
-private const string TODO_KEY = "do";
+    private const string TODO_KEY = "do";
 
-protected override async Task OnInitAsync()
-{
-    new Task(() =>
+    protected override async Task OnInitAsync()
     {
-        TodoItems = GetTasksFromLocalStorage();
-    }).Start();
-}
-
-private static void SaveItemsInLocalStorage()
-{
-    if (TodoItems == null)
-    {
-        return;
+        TodoItems = await GetTasksFromLocalStorage();
     }
-    var s = JsonUtil.Serialize(TodoItems);
-    RegisteredFunction.Invoke<bool>("storeInLocal", new object[] { TODO_KEY, s });
-}
 
-private static List<TaskItem> GetTasksFromLocalStorage()
-{
-    var r = RegisteredFunction.Invoke<object>("getFromLocal", new object[] { TODO_KEY });
-    if (r == null)
+    private async void SaveItemsInLocalStorage()
     {
-        return new List<TaskItem>();
-    }
-    try
-    {
-        return JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex);
-        return new List<TaskItem>();
-    }
-}
-
-public static void AddItem()
-{
-    InputButtonText = "Save";
-    if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
-    {
-        return;
-    }
-    try
-    {
-        // Editing existing task
-        if (CurrentItem != null)
+        if (TodoItems == null)
         {
-            CurrentItem.FromLine(CurrentInput);
+            return;
         }
-        // New task
-        else
+        var s = JsonUtil.Serialize(TodoItems);
+        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, s });
+    }
+
+    private async Task<List<TaskItem>> GetTasksFromLocalStorage()
+    {
+        var r = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
+        if (r == null)
         {
-            var t = new TaskItem();
-            t.FromLine(CurrentInput);
-            t.Creation = DateTime.Now;
-            TodoItems.Add(t);
+            return new List<TaskItem>();
         }
-        CurrentInput = null;
-        CurrentItem = null;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex);
-    }
-    SaveItemsInLocalStorage();
-}
-
-public static void Complete(TaskItem item)
-{
-    item.Complete();
-    SaveItemsInLocalStorage();
-}
-
-public static void Edit(TaskItem item)
-{
-    CurrentItem = item;
-    CurrentInput = CurrentItem.TodoLine();
-    InputButtonText = "Update";
-}
-
-public static void Delete(TaskItem item)
-{
-    try
-    {
-        if (CurrentItem == item)
+        try
         {
-            CurrentItem = null;
+            return JsonUtil.Deserialize<List<TaskItem>>(r.ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return new List<TaskItem>();
+        }
+    }
+
+    public void AddItem()
+    {
+        InputButtonText = "Save";
+        if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
+        {
+            return;
+        }
+        try
+        {
+            // Editing existing task
+            if (CurrentItem != null)
+            {
+                CurrentItem.FromLine(CurrentInput);
+            }
+            // New task
+            else
+            {
+                var t = new TaskItem();
+                t.FromLine(CurrentInput);
+                t.Creation = DateTime.Now;
+                TodoItems.Add(t);
+            }
             CurrentInput = null;
+            CurrentItem = null;
         }
-        TodoItems.Remove(item);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex);
-    }
-    SaveItemsInLocalStorage();
-}
-
-public static void ClearInput()
-{
-    CurrentInput = null;
-    CurrentItem = null;
-    InputButtonText = "Save";
-}
-
-public static void Import(string fileData)
-{
-    if (string.IsNullOrWhiteSpace(fileData))
-    {
-        return;
-    }
-    var items = new List<TaskItem>();
-    using (StringReader reader = new StringReader(fileData))
-    {
-        string line;
-        while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+        catch (Exception ex)
         {
-            try
-            {
-                var i = TodoTxt.Parse(line);
-                if (i != null)
-                {
-                    items.Add(i);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            Console.WriteLine(ex);
         }
-    }
-    if (items.Count > 0)
-    {
-        TodoItems = items;
         SaveItemsInLocalStorage();
     }
-}
 
-public static void Export()
-{
-    if (TodoItems == null || TodoItems.Count < 1)
+    public void Complete(TaskItem item)
     {
-        return;
+        item.Complete();
+        SaveItemsInLocalStorage();
     }
-    var output = new List<string>();
-    foreach (var item in TodoItems.OrderBy(x => x.Creation))
+
+    public void Edit(TaskItem item)
     {
-        var l = item.TodoLine();
-        if (!string.IsNullOrWhiteSpace(l))
+        CurrentItem = item;
+        CurrentInput = CurrentItem.TodoLine();
+        InputButtonText = "Update";
+    }
+
+    public void Delete(TaskItem item)
+    {
+        try
         {
-            output.Add(l + "\n");
+            if (CurrentItem == item)
+            {
+                CurrentItem = null;
+                CurrentInput = null;
+            }
+            TodoItems.Remove(item);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        SaveItemsInLocalStorage();
+    }
+
+    public void ClearInput()
+    {
+        CurrentInput = null;
+        CurrentItem = null;
+        InputButtonText = "Save";
+    }
+
+    public void Import(string fileData)
+    {
+        if (string.IsNullOrWhiteSpace(fileData))
+        {
+            return;
+        }
+        var items = new List<TaskItem>();
+        using (StringReader reader = new StringReader(fileData))
+        {
+            string line;
+            while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+            {
+                try
+                {
+                    var i = TodoTxt.Parse(line);
+                    if (i != null)
+                    {
+                        items.Add(i);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+        }
+        if (items.Count > 0)
+        {
+            TodoItems = items;
+            SaveItemsInLocalStorage();
         }
     }
-    if (output.Count < 1)
+
+    public async void Export()
     {
-        return;
+        if (TodoItems == null || TodoItems.Count < 1)
+        {
+            return;
+        }
+        var output = new List<string>();
+        foreach (var item in TodoItems.OrderBy(x => x.Creation))
+        {
+            var l = item.TodoLine();
+            if (!string.IsNullOrWhiteSpace(l))
+            {
+                output.Add(l + "\n");
+            }
+        }
+        if (output.Count < 1)
+        {
+            return;
+        }
+        await JSRuntime.Current.InvokeAsync<bool>("saveToFile", new object[] { output });
     }
-    RegisteredFunction.Invoke<bool>("saveToFile", new object[] { output });
-}
 }
