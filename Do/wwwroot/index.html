@@ -36,30 +36,33 @@
             return localStorage[key];
         };
 
-            //document.getElementById('import-button').addEventListener('change', function () {
-            //    let file = this.children[0].files[0];
-            //    let reader = new FileReader();
-            //    reader.onloadend = function callback(e) {
-            //        let result = e.target.result;
-            //        const assemblyName = 'Do';
-            //        const namespace = 'Do.Pages';
-            //        const typeName = 'Index';
-            //        const methodName = 'Import';
+        window.addImportListener = async () => {
+            document.getElementById('import-button').addEventListener('change', async function () {
+                let file = this.children[0].files[0];
+                let reader = new FileReader();
+                reader.onloadend = async function callback(e) {
+                    let result = e.target.result;
+                    const assemblyName = 'Do';
+                    const namespace = 'Do.Pages';
+                    const typeName = 'Index';
+                    const methodName = 'Import';
 
-            //        const importMethod = Blazor.platform.findMethod(
-            //            assemblyName,
-            //            namespace,
-            //            typeName,
-            //            methodName
-            //        );
+                    const importMethod = Blazor.platform.findMethod(
+                        assemblyName,
+                        namespace,
+                        typeName,
+                        methodName
+                    );
 
-            //        let data = Blazor.platform.toDotNetString(result);
+                    let data = Blazor.platform.toDotNetString(result);
 
-            //        let resultAsDotNetString = Blazor.platform.callMethod(importMethod, null, [data]);
-            //    };
-            //    reader.readAsText(file);
-            //});
+                    Blazor.platform.callMethod(importMethod, null, [data]);
+                };
+                reader.readAsText(file);
+            });
 
+            return true;
+        };
     </script>
 </body>
 </html>

@@ -155,7 +155,7 @@
 }
 
 @functions {
-    public List<TaskItem> TodoItems;
+    public static List<TaskItem> TodoItems;
 
     public string CurrentInput { get; set; } = null;
 
@@ -168,9 +168,11 @@
     protected override async Task OnInitAsync()
     {
         TodoItems = await GetTasksFromLocalStorage();
+
+        await JSRuntime.Current.InvokeAsync<bool>("addImportListener");
     }
 
-    private async void SaveItemsInLocalStorage()
+    private static async void SaveItemsInLocalStorage()
     {
         if (TodoItems == null)
         {
@@ -268,12 +270,14 @@
         InputButtonText = "Save";
     }
 
-    public void Import(string fileData)
+    [JSInvokable]
+    public static void Import(string fileData)
     {
         if (string.IsNullOrWhiteSpace(fileData))
         {
             return;
         }
+
         var items = new List<TaskItem>();
         using (StringReader reader = new StringReader(fileData))
         {
@@ -307,6 +311,7 @@
         {
             return;
         }
+
         var output = new List<string>();
         foreach (var item in TodoItems.OrderBy(x => x.Creation))
         {
