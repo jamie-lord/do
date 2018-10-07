@@ -172,14 +172,13 @@
         await JSRuntime.Current.InvokeAsync<bool>("addImportListener");
     }
 
-    private static async void SaveItemsInLocalStorage()
+    private static async Task SaveItemsInLocalStorage()
     {
-        if (TodoItems == null)
+        if (TodoItems != null)
         {
-            return;
+            var s = Json.Serialize(TodoItems);
+            await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, s });
         }
-        var s = Json.Serialize(TodoItems);
-        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, s });
     }
 
     private async Task<List<TaskItem>> GetTasksFromLocalStorage()
@@ -200,7 +199,7 @@
         }
     }
 
-    public void AddItem()
+    public async void AddItem()
     {
         InputButtonText = "Save";
         if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
@@ -229,13 +228,13 @@
         {
             Console.WriteLine(ex);
         }
-        SaveItemsInLocalStorage();
+        await SaveItemsInLocalStorage();
     }
 
-    public void Complete(TaskItem item)
+    public async void Complete(TaskItem item)
     {
         item.Complete();
-        SaveItemsInLocalStorage();
+        await SaveItemsInLocalStorage();
     }
 
     public void Edit(TaskItem item)
@@ -245,7 +244,7 @@
         InputButtonText = "Update";
     }
 
-    public void Delete(TaskItem item)
+    public async void Delete(TaskItem item)
     {
         try
         {
@@ -260,7 +259,7 @@
         {
             Console.WriteLine(ex);
         }
-        SaveItemsInLocalStorage();
+        await SaveItemsInLocalStorage();
     }
 
     public void ClearInput()
@@ -271,7 +270,7 @@
     }
 
     [JSInvokable]
-    public static void Import(string fileData)
+    public static async void Import(string fileData)
     {
         if (string.IsNullOrWhiteSpace(fileData))
         {
@@ -301,7 +300,8 @@
         if (items.Count > 0)
         {
             TodoItems = items;
-            SaveItemsInLocalStorage();
+            await SaveItemsInLocalStorage();
+            await JSRuntime.Current.InvokeAsync<bool>("reload");
         }
     }
 

@@ -36,6 +36,11 @@
             return localStorage[key];
         };
 
+        window.reload = () => {
+            location.reload();
+            return true;
+        };
+
         window.addImportListener = async () => {
             document.getElementById('import-button').addEventListener('change', async function () {
                 let file = this.children[0].files[0];
