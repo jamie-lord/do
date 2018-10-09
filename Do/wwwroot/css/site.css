@@ -1,4 +1,77 @@
-﻿.section-row {
+﻿.loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+}
+
+    .loading:after {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: transparent;
+        display: block;
+        top: 50%;
+        left: 50%;
+        margin: -5px 0 0 -25px;
+        content: '';
+        border-radius: 50%;
+        animation: loading 1s infinite linear;
+    }
+
+@keyframes loading {
+    0% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 0 #ddd, -20px 0 0 0 #ddd;
+    }
+
+    5% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 0 #ddd, -20px 0 0 2px #ddd;
+    }
+
+    15% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 0 #ddd, -20px 0 0 8px #ddd;
+    }
+
+    20% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 2px #ddd, -20px 0 0 10px #ddd;
+    }
+
+    25% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 8px #ddd, -20px 0 0 5px #ddd;
+    }
+
+    30% {
+        box-shadow: 60px 0 0 2px #ddd, 20px 0 0 10px #ddd, -20px 0 0 2px #ddd;
+    }
+
+    35% {
+        box-shadow: 60px 0 0 8px #ddd, 20px 0 0 5px #ddd, -20px 0 0 0 #ddd;
+    }
+
+    40% {
+        box-shadow: 60px 0 0 10px #ddd, 20px 0 0 2px #ddd, -20px 0 0 0 #ddd;
+    }
+
+    45% {
+        box-shadow: 60px 0 0 5px #ddd, 20px 0 0 0 #ddd, -20px 0 0 0 #ddd;
+    }
+
+    50% {
+        box-shadow: 60px 0 0 2px #ddd, 20px 0 0 0 #ddd, -20px 0 0 0 #ddd;
+    }
+
+    65% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 0 #ddd, -20px 0 0 0 #ddd;
+    }
+
+    100% {
+        box-shadow: 60px 0 0 0 #ddd, 20px 0 0 0 #ddd, -20px 0 0 0 #ddd;
+    }
+}
+
+.section-row {
     padding-bottom: 2em;
 }
 
