@@ -33,7 +33,7 @@
                 <button onclick="@ClearInput" class="btn btn-outline-secondary">
                     <i class="fas fa-times"></i>
                 </button>
-                <button onclick="@AddItem" class="btn btn-outline-primary">@InputButtonText</button>
+                <button id="addItemButton" onclick="@AddItem" class="btn btn-outline-primary">@InputButtonText</button>
             </div>
         </div>
     </div>
@@ -175,7 +175,7 @@ protected override async Task OnInitAsync()
 {
     TodoItems = await GetTasksFromLocalStorage();
 
-    await JSRuntime.Current.InvokeAsync<bool>("addImportListener");
+    await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
 }
 
 private static async Task SaveItemsInLocalStorage()
@@ -243,11 +243,12 @@ public async void Complete(TaskItem item)
     await SaveItemsInLocalStorage();
 }
 
-public void Edit(TaskItem item)
+public async void Edit(TaskItem item)
 {
     CurrentItem = item;
     CurrentInput = CurrentItem.TodoLine();
     InputButtonText = "Update";
+    await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
 }
 
 public async void Delete(TaskItem item)
