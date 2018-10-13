@@ -45,7 +45,12 @@
             return true;
         };
 
-        window.addImportListener = async () => {
+        window.focusOnInputField = () => {
+            document.getElementById("taskTextArea").focus();
+            return true;
+        };
+
+        window.addEventListeners = async () => {
             document.getElementById('import-button').addEventListener('change', async function () {
                 let file = this.children[0].files[0];
                 let reader = new FileReader();
@@ -68,6 +73,13 @@
                     Blazor.platform.callMethod(importMethod, null, [data]);
                 };
                 reader.readAsText(file);
+            });
+
+            document.getElementById("taskTextArea").addEventListener("keyup", function (event) {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById("addItemButton").click();
+                }
             });
 
             return true;
