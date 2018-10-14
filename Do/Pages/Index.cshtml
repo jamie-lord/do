@@ -45,8 +45,6 @@
 {
     <div class="row section-row">
         <div class="col">
-            <h1>Your tasks</h1>
-
             @foreach (var itemsForProject in TodoItems.Where(x => !x.Completed).OrderBy(x => x.Creation).GroupBy(x => x.Project.FirstOrDefault()))
             {
                 <div class="project-group">
