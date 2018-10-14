@@ -17,6 +17,9 @@
                     <li class="nav-item">
                         <a class="nav-link btn" onclick="@Export">Export</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn" data-toggle="modal" data-target="#helpModal">Help</a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -155,5 +158,25 @@
 <div class="row section-row">
     <div class="col">
         <p class="text-center"><small>v0.1.1</small></p>
+    </div>
+</div>
+
+<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">todo.txt format rules</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="img/todo_format.svg" class="img-fluid" alt="todo.txt format">
+                <p>For more information on the todo.txt standard see <a href="https://github.com/todotxt/todo.txt">here</a>.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
