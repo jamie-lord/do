@@ -109,9 +109,14 @@
 {
     <div class="row section-row">
         <div class="col">
-            <h1>Completed tasks</h1>
-
-            <div class="list-group">
+            <a class="btn btn-outline-secondary btn-block" data-toggle="collapse" href="#collapseCompleted" role="button" aria-expanded="false" aria-controls="collapseCompleted">
+                Completed tasks
+            </a>
+        </div>
+    </div>
+    <div class="row section-row">
+        <div class="col">
+            <div class="list-group collapse" id="collapseCompleted">
                 @foreach (var item in TodoItems.Where(x => x.Completed).OrderByDescending(x => x.Completion))
                 {
                     <div class="list-group-item">
