@@ -52,7 +52,13 @@
                 <div class="project-group">
                     @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
                     {
-                        <h2>@itemsForProject.Key</h2>
+                        <h4 style="display: inline-block;">
+                            @itemsForProject.Key <small>
+                                <a onclick="@(() => { NewItemForProject(itemsForProject.Key); })" role="button" href="" style="color: #6c757d;">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </small>
+                        </h4>
                     }
                     <div class="list-group">
                         @foreach (var item in itemsForProject)
@@ -67,22 +73,24 @@
                                         </div>
 
                                         <div class="col">
-                                            <h4>
+                                            <p style="margin-bottom: 0;">
                                                 @if (!string.IsNullOrWhiteSpace(item.Priority))
                                                 {
                                                     <span class="badge badge-primary">@item.Priority</span>
                                                 }
                                                 @item.Body
-                                            </h4>
+                                            </p>
                                             <p class="task-meta">
-                                                @item.Creation?.ToString("yyyy-MM-dd")
-                                                @if (item.Context != null && item.Context.Count > 0)
-                                                {
-                                                    foreach (var context in item.Context)
+                                                <small>
+                                                    @item.Creation?.ToString("yyyy-MM-dd")
+                                                    @if (item.Context != null && item.Context.Count > 0)
                                                     {
-                                                        <span class="badge badge-secondary">@context</span>
+                                                        foreach (var context in item.Context)
+                                                        {
+                                                            <span class="badge badge-secondary">@context</span>
+                                                        }
                                                     }
-                                                }
+                                                </small>
                                             </p>
                                         </div>
 
@@ -109,9 +117,9 @@
 {
     <div class="row section-row">
         <div class="col">
-            <a class="btn btn-outline-secondary btn-block" data-toggle="collapse" href="#collapseCompleted" role="button" aria-expanded="false" aria-controls="collapseCompleted">
+            <button class="btn btn-outline-secondary btn-block" type="button" data-toggle="collapse" data-target="#collapseCompleted" aria-expanded="false" aria-controls="collapseCompleted">
                 Completed tasks
-            </a>
+            </button>
         </div>
     </div>
     <div class="row section-row">
@@ -123,23 +131,25 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col">
-                                    <h4>
+                                    <p style="margin-bottom: 0;">
                                         @if (!string.IsNullOrWhiteSpace(item.Priority))
                                         {
                                             <span class="badge badge-primary">@item.Priority</span>
                                         }
                                         @item.Body
-                                    </h4>
+                                    </p>
                                     <p class="task-meta">
-                                        @item.Creation?.ToString("yyyy-MM-dd")
-                                        @item.Completion?.ToString("yyyy-MM-dd")
-                                        @if (item.Context != null && item.Context.Count > 0)
-                                        {
-                                            foreach (var context in item.Context)
+                                        <small>
+                                            @item.Creation?.ToString("yyyy-MM-dd")
+                                            @item.Completion?.ToString("yyyy-MM-dd")
+                                            @if (item.Context != null && item.Context.Count > 0)
                                             {
-                                                <span class="badge badge-secondary">@context</span>
+                                                foreach (var context in item.Context)
+                                                {
+                                                    <span class="badge badge-secondary">@context</span>
+                                                }
                                             }
-                                        }
+                                        </small>
                                     </p>
                                 </div>
 
@@ -162,7 +172,7 @@
 
 <div class="row section-row">
     <div class="col">
-        <p class="text-center"><small>v0.2.0</small></p>
+        <p class="text-center"><small>v0.2.1</small></p>
     </div>
 </div>
 
@@ -229,6 +239,14 @@ private async Task<List<TaskItem>> GetTasksFromLocalStorage()
         Console.WriteLine(ex);
         return new List<TaskItem>();
     }
+}
+
+public async void NewItemForProject(string project)
+{
+    ClearInput();
+    CurrentInput = $" +{project}";
+    await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
+    await JSRuntime.Current.InvokeAsync<bool>("setCursorOnBeginningOfInputField");
 }
 
 public async void AddItem()
