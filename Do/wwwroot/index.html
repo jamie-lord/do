@@ -52,6 +52,11 @@
             return true;
         };
 
+        window.setCursorOnBeginningOfInputField = () => {
+            document.getElementById("taskTextArea").setSelectionRange(0, 0);
+            return true;
+        };
+
         window.addEventListeners = async () => {
             document.getElementById('import-button').addEventListener('change', async function () {
                 let file = this.children[0].files[0];

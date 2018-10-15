@@ -52,7 +52,8 @@
                 <div class="project-group">
                     @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
                     {
-                        <h2>@itemsForProject.Key</h2>
+                        <h2 style="display: inline-block;">@itemsForProject.Key <small><a onclick="@(() => { NewItemForProject(itemsForProject.Key); })" role="button" href="" style="color: #6c757d;">
+    <i class="fas fa-plus"></i></a></small></h2>
                     }
                     <div class="list-group">
                         @foreach (var item in itemsForProject)
@@ -187,177 +188,185 @@
 </div>
 
 @functions {
-public static List<TaskItem> TodoItems;
+    public static List<TaskItem> TodoItems;
 
-public string CurrentInput { get; set; } = null;
+    public string CurrentInput { get; set; } = null;
 
-public TaskItem CurrentItem { get; set; } = null;
+    public TaskItem CurrentItem { get; set; } = null;
 
-public string InputButtonText { get; private set; } = "Save";
+    public string InputButtonText { get; private set; } = "Save";
 
-private const string TODO_KEY = "do";
+    private const string TODO_KEY = "do";
 
-protected override async Task OnInitAsync()
-{
-    TodoItems = await GetTasksFromLocalStorage();
-
-    await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
-}
-
-private static async Task SaveItemsInLocalStorage()
-{
-    if (TodoItems != null)
+    protected override async Task OnInitAsync()
     {
-        var s = Json.Serialize(TodoItems);
-        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, s });
+        TodoItems = await GetTasksFromLocalStorage();
+
+        await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
     }
-}
 
-private async Task<List<TaskItem>> GetTasksFromLocalStorage()
-{
-    var r = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
-    if (r == null)
+    private static async Task SaveItemsInLocalStorage()
     {
-        return new List<TaskItem>();
-    }
-    try
-    {
-        return Json.Deserialize<List<TaskItem>>(r.ToString());
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex);
-        return new List<TaskItem>();
-    }
-}
-
-public async void AddItem()
-{
-    InputButtonText = "Save";
-    if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
-    {
-        return;
-    }
-    try
-    {
-        // Editing existing task
-        if (CurrentItem != null)
+        if (TodoItems != null)
         {
-            CurrentItem.FromLine(CurrentInput);
+            var s = Json.Serialize(TodoItems);
+            await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, s });
         }
-        // New task
-        else
+    }
+
+    private async Task<List<TaskItem>> GetTasksFromLocalStorage()
+    {
+        var r = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
+        if (r == null)
         {
-            var t = new TaskItem();
-            t.FromLine(CurrentInput);
-            t.Creation = DateTime.Now;
-            TodoItems.Add(t);
+            return new List<TaskItem>();
         }
+        try
+        {
+            return Json.Deserialize<List<TaskItem>>(r.ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return new List<TaskItem>();
+        }
+    }
+
+    public async void NewItemForProject(string project)
+    {
+        ClearInput();
+        CurrentInput = $" +{project}";
+        await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
+        await JSRuntime.Current.InvokeAsync<bool>("setCursorOnBeginningOfInputField");
+    }
+
+    public async void AddItem()
+    {
+        InputButtonText = "Save";
+        if (CurrentInput == null || string.IsNullOrWhiteSpace(CurrentInput))
+        {
+            return;
+        }
+        try
+        {
+            // Editing existing task
+            if (CurrentItem != null)
+            {
+                CurrentItem.FromLine(CurrentInput);
+            }
+            // New task
+            else
+            {
+                var t = new TaskItem();
+                t.FromLine(CurrentInput);
+                t.Creation = DateTime.Now;
+                TodoItems.Add(t);
+            }
+            CurrentInput = null;
+            CurrentItem = null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        await SaveItemsInLocalStorage();
+    }
+
+    public async void Complete(TaskItem item)
+    {
+        item.Complete();
+        await SaveItemsInLocalStorage();
+    }
+
+    public async void Edit(TaskItem item)
+    {
+        CurrentItem = item;
+        CurrentInput = CurrentItem.TodoLine();
+        InputButtonText = "Update";
+        await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
+    }
+
+    public async void Delete(TaskItem item)
+    {
+        try
+        {
+            if (CurrentItem == item)
+            {
+                CurrentItem = null;
+                CurrentInput = null;
+            }
+            TodoItems.Remove(item);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        await SaveItemsInLocalStorage();
+    }
+
+    public void ClearInput()
+    {
         CurrentInput = null;
         CurrentItem = null;
+        InputButtonText = "Save";
     }
-    catch (Exception ex)
+
+    [JSInvokable]
+    public static async void Import(string fileData)
     {
-        Console.WriteLine(ex);
-    }
-    await SaveItemsInLocalStorage();
-}
-
-public async void Complete(TaskItem item)
-{
-    item.Complete();
-    await SaveItemsInLocalStorage();
-}
-
-public async void Edit(TaskItem item)
-{
-    CurrentItem = item;
-    CurrentInput = CurrentItem.TodoLine();
-    InputButtonText = "Update";
-    await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
-}
-
-public async void Delete(TaskItem item)
-{
-    try
-    {
-        if (CurrentItem == item)
+        if (string.IsNullOrWhiteSpace(fileData))
         {
-            CurrentItem = null;
-            CurrentInput = null;
+            return;
         }
-        TodoItems.Remove(item);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex);
-    }
-    await SaveItemsInLocalStorage();
-}
 
-public void ClearInput()
-{
-    CurrentInput = null;
-    CurrentItem = null;
-    InputButtonText = "Save";
-}
-
-[JSInvokable]
-public static async void Import(string fileData)
-{
-    if (string.IsNullOrWhiteSpace(fileData))
-    {
-        return;
-    }
-
-    var items = new List<TaskItem>();
-    using (StringReader reader = new StringReader(fileData))
-    {
-        string line;
-        while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+        var items = new List<TaskItem>();
+        using (StringReader reader = new StringReader(fileData))
         {
-            try
+            string line;
+            while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
             {
-                var i = TodoTxt.Parse(line);
-                if (i != null)
+                try
                 {
-                    items.Add(i);
+                    var i = TodoTxt.Parse(line);
+                    if (i != null)
+                    {
+                        items.Add(i);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
                 }
             }
-            catch (Exception ex)
+        }
+        if (items.Count > 0)
+        {
+            TodoItems = items;
+            await SaveItemsInLocalStorage();
+            await JSRuntime.Current.InvokeAsync<bool>("reload");
+        }
+    }
+
+    public async void Export()
+    {
+        if (TodoItems == null || TodoItems.Count < 1)
+        {
+            return;
+        }
+
+        var output = new List<string>();
+        foreach (var item in TodoItems.OrderBy(x => x.Creation))
+        {
+            var l = item.TodoLine();
+            if (!string.IsNullOrWhiteSpace(l))
             {
-                Console.WriteLine(ex);
+                output.Add(l + "\n");
             }
         }
-    }
-    if (items.Count > 0)
-    {
-        TodoItems = items;
-        await SaveItemsInLocalStorage();
-        await JSRuntime.Current.InvokeAsync<bool>("reload");
-    }
-}
-
-public async void Export()
-{
-    if (TodoItems == null || TodoItems.Count < 1)
-    {
-        return;
-    }
-
-    var output = new List<string>();
-    foreach (var item in TodoItems.OrderBy(x => x.Creation))
-    {
-        var l = item.TodoLine();
-        if (!string.IsNullOrWhiteSpace(l))
+        if (output.Count < 1)
         {
-            output.Add(l + "\n");
+            return;
         }
+        await JSRuntime.Current.InvokeAsync<bool>("saveToFile", new object[] { output });
     }
-    if (output.Count < 1)
-    {
-        return;
-    }
-    await JSRuntime.Current.InvokeAsync<bool>("saveToFile", new object[] { output });
-}
 }
