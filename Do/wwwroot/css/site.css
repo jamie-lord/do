@@ -94,3 +94,7 @@ body {
 .project-group {
     padding-bottom: 1em;
 }
+
+.project-btn:focus {
+    box-shadow: none !important;
+}

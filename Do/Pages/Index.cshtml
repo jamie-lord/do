@@ -45,69 +45,91 @@
 
 @if (TodoItems != null && TodoItems.Any(x => !x.Completed))
 {
+    @if (UniqueProjects().Any())
+    {
+        <div class="row section-row">
+            <div class="col">
+                @foreach (string project in UniqueProjects())
+                {
+                    if (project == SelectedProject)
+                    {
+                        <button type="button" class="btn btn-outline-secondary btn-sm project-btn active" onclick="@(() => { SelectProject(project); })">@project</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-secondary btn-sm project-btn" onclick="@(() => { SelectProject(project); })">@project</button>
+                    }
+                }
+            </div>
+        </div>
+    }
+
     <div class="row section-row">
         <div class="col">
             @foreach (var itemsForProject in TodoItems.Where(x => !x.Completed).OrderBy(x => x.Creation).GroupBy(x => x.Project.FirstOrDefault()))
             {
-                <div class="project-group">
-                    @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
-                    {
-                        <h4 style="display: inline-block;">
-                            @itemsForProject.Key <small>
-                                <a onclick="@(() => { NewItemForProject(itemsForProject.Key); })" role="button" href="" style="color: #6c757d;">
-                                    <i class="fas fa-plus"></i>
-                                </a>
-                            </small>
-                        </h4>
-                    }
-                    <div class="list-group">
-                        @foreach (var item in itemsForProject)
+                @if (SelectedProject == null || (SelectedProject != null && itemsForProject.Key == SelectedProject))
+                {
+                    <div class="project-group">
+                        @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
                         {
-                            <div class="list-group-item">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-md-auto my-auto">
-                                            <button class="btn btn-outline-success" onclick="@(() => { Complete(item); })">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </div>
+                            <h4 style="display: inline-block;">
+                                @itemsForProject.Key <small>
+                                    <a onclick="@(() => { NewItemForProject(itemsForProject.Key); })" role="button" href="" style="color: #6c757d;">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </small>
+                            </h4>
+                        }
+                        <div class="list-group">
+                            @foreach (var item in itemsForProject)
+                            {
+                                <div class="list-group-item">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-auto my-auto">
+                                                <button class="btn btn-outline-success" onclick="@(() => { Complete(item); })">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </div>
 
-                                        <div class="col">
-                                            <p style="margin-bottom: 0;">
-                                                @if (!string.IsNullOrWhiteSpace(item.Priority))
-                                                {
-                                                    <span class="badge badge-primary">@item.Priority</span>
-                                                }
-                                                @item.Body
-                                            </p>
-                                            <p class="task-meta">
-                                                <small>
-                                                    @item.Creation?.ToString("yyyy-MM-dd")
-                                                    @if (item.Context != null && item.Context.Count > 0)
+                                            <div class="col">
+                                                <p style="margin-bottom: 0;">
+                                                    @if (!string.IsNullOrWhiteSpace(item.Priority))
                                                     {
-                                                        foreach (var context in item.Context)
-                                                        {
-                                                            <span class="badge badge-secondary">@context</span>
-                                                        }
+                                                        <span class="badge badge-primary">@item.Priority</span>
                                                     }
-                                                </small>
-                                            </p>
-                                        </div>
+                                                    @item.Body
+                                                </p>
+                                                <p class="task-meta">
+                                                    <small>
+                                                        @item.Creation?.ToString("yyyy-MM-dd")
+                                                        @if (item.Context != null && item.Context.Count > 0)
+                                                        {
+                                                            foreach (var context in item.Context)
+                                                            {
+                                                                <span class="badge badge-secondary">@context</span>
+                                                            }
+                                                        }
+                                                    </small>
+                                                </p>
+                                            </div>
 
-                                        <div class="col-md-auto my-auto">
-                                            <button class="btn btn-outline-secondary" onclick="@(() => { Edit(item); })">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-outline-danger" onclick="@(() => { Delete(item); })">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="col-md-auto my-auto">
+                                                <button class="btn btn-outline-secondary" onclick="@(() => { Edit(item); })">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="@(() => { Delete(item); })">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             }
         </div>
     </div>
@@ -205,6 +227,8 @@ public TaskItem CurrentItem { get; set; } = null;
 
 public string InputButtonText { get; private set; } = "Save";
 
+public string SelectedProject { get; set; } = null;
+
 private const string TODO_KEY = "do";
 
 protected override async Task OnInitAsync()
@@ -212,6 +236,44 @@ protected override async Task OnInitAsync()
     TodoItems = await GetTasksFromLocalStorage();
 
     await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
+}
+
+public IEnumerable<string> UniqueProjects()
+{
+    HashSet<string> projects = new HashSet<string>();
+    if (TodoItems != null)
+    {
+        foreach (TaskItem item in TodoItems)
+        {
+            if (item.Completed)
+            {
+                continue;
+            }
+
+            foreach (string p in item.Project)
+            {
+                if (!string.IsNullOrWhiteSpace(p))
+                {
+                    projects.Add(p);
+                }
+            }
+        }
+    }
+    return projects;
+}
+
+public void SelectProject(string project)
+{
+    // Project is currently selected and should be set to no project to display all projects.
+    if (project == SelectedProject)
+    {
+        SelectedProject = null;
+    }
+    else
+    {
+        SelectedProject = project;
+    }
+    StateHasChanged();
 }
 
 private static async Task SaveItemsInLocalStorage()
