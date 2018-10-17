@@ -74,7 +74,7 @@
 @font-face {
     font-family: 'Proxima Nova';
     src: url('../fonts/Proxima Nova.eot');
-    src: url('../fonts/Proxima Nova.eot?#iefix') format('embedded-opentype'), url('../fonts/Proxima Nova.woff2') format('woff2'), url('../fonts/Proxima Nova.woff') format('woff'), url('../fonts/Proxima Nova.ttf') format('truetype'), url('../fonts/Proxima Nova.svg#proxima_nova_altregular') format('svg');
+    src: url('../fonts/Proxima Nova.eot?#iefix') format('embedded-opentype'), url('../fonts/Proxima Nova.woff') format('woff'), url('../fonts/Proxima Nova.ttf') format('truetype'), url('../fonts/Proxima Nova.svg#proxima_nova_alt_rgregular') format('svg');
     font-weight: normal;
     font-style: normal;
 }
