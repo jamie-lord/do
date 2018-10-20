@@ -43,13 +43,13 @@
 </div>
 
 
-@if (TodoItems != null && TodoItems.Any(x => !x.Completed))
+@if (Tasks.HasIncompleteTasks)
 {
-    @if (UniqueProjects().Any())
+    @if (Tasks.Projects.Count() > 1)
     {
         <div class="row section-row">
             <div class="col">
-                @foreach (string project in UniqueProjects())
+                @foreach (string project in Tasks.Projects)
                 {
                     if (project == SelectedProject)
                     {
@@ -66,47 +66,48 @@
 
     <div class="row section-row">
         <div class="col">
-            @foreach (var itemsForProject in TodoItems.Where(x => !x.Completed).OrderBy(x => x.Creation).GroupBy(x => x.Project.FirstOrDefault()))
+            @foreach (string project in Tasks.Projects)
             {
-                @if (SelectedProject == null || (SelectedProject != null && itemsForProject.Key == SelectedProject))
+
+                @if (SelectedProject == null || (SelectedProject != null && project == SelectedProject))
                 {
                     <div class="project-group">
-                        @if (!string.IsNullOrWhiteSpace(itemsForProject.Key))
+                        @if (!string.IsNullOrWhiteSpace(project) && project != TaskList.NoProject)
                         {
                             <h4 style="display: inline-block;">
-                                @itemsForProject.Key <small>
-                                    <a onclick="@(() => { NewItemForProject(itemsForProject.Key); })" role="button" href="" style="color: #6c757d;">
+                                @project <small>
+                                    <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
                                         <i class="fas fa-plus"></i>
                                     </a>
                                 </small>
                             </h4>
                         }
                         <div class="list-group">
-                            @foreach (var item in itemsForProject)
+                            @foreach (TaskItem task in Tasks.TasksForProject(project))
                             {
                                 <div class="list-group-item">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-md-auto my-auto">
-                                                <button class="btn btn-outline-success" onclick="@(() => { Complete(item); })">
+                                                <button class="btn btn-outline-success" onclick="@(() => { Complete(task); })">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </div>
 
                                             <div class="col">
                                                 <p style="margin-bottom: 0;">
-                                                    @if (!string.IsNullOrWhiteSpace(item.Priority))
+                                                    @if (!string.IsNullOrWhiteSpace(task.Priority))
                                                     {
-                                                        <span class="badge badge-primary">@item.Priority</span>
+                                                        <span class="badge badge-primary">@task.Priority</span>
                                                     }
-                                                    @item.Body
+                                                    @task.Body
                                                 </p>
                                                 <p class="task-meta">
                                                     <small>
-                                                        @item.Creation?.ToString("yyyy-MM-dd")
-                                                        @if (item.Context != null && item.Context.Count > 0)
+                                                        @task.Creation?.ToString("yyyy-MM-dd")
+                                                        @if (task.Context != null && task.Context.Count > 0)
                                                         {
-                                                            foreach (var context in item.Context)
+                                                            foreach (var context in task.Context)
                                                             {
                                                                 <span class="badge badge-secondary">@context</span>
                                                             }
@@ -116,10 +117,10 @@
                                             </div>
 
                                             <div class="col-md-auto my-auto">
-                                                <button class="btn btn-outline-secondary" onclick="@(() => { Edit(item); })">
+                                                <button class="btn btn-outline-secondary" onclick="@(() => { Edit(task); })">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <button class="btn btn-outline-danger" onclick="@(() => { Delete(item); })">
+                                                <button class="btn btn-outline-danger" onclick="@(() => { Delete(task); })">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
@@ -135,7 +136,7 @@
     </div>
 }
 
-@if (TodoItems != null && TodoItems.Any(x => x.Completed))
+@if (Tasks.HasCompleteTasks)
 {
     <div class="row section-row">
         <div class="col">
@@ -147,26 +148,26 @@
     <div class="row section-row">
         <div class="col">
             <div class="list-group collapse" id="collapseCompleted">
-                @foreach (var item in TodoItems.Where(x => x.Completed).OrderByDescending(x => x.Completion))
+                @foreach (TaskItem task in Tasks.CompleteTasks)
                 {
                     <div class="list-group-item">
                         <div class="container">
                             <div class="row">
                                 <div class="col">
                                     <p style="margin-bottom: 0;">
-                                        @if (!string.IsNullOrWhiteSpace(item.Priority))
+                                        @if (!string.IsNullOrWhiteSpace(task.Priority))
                                         {
-                                            <span class="badge badge-primary">@item.Priority</span>
+                                            <span class="badge badge-primary">@task.Priority</span>
                                         }
-                                        @item.Body
+                                        @task.Body
                                     </p>
                                     <p class="task-meta">
                                         <small>
-                                            @item.Creation?.ToString("yyyy-MM-dd")
-                                            @item.Completion?.ToString("yyyy-MM-dd")
-                                            @if (item.Context != null && item.Context.Count > 0)
+                                            @task.Creation?.ToString("yyyy-MM-dd")
+                                            @task.Completion?.ToString("yyyy-MM-dd")
+                                            @if (task.Context != null && task.Context.Count > 0)
                                             {
-                                                foreach (var context in item.Context)
+                                                foreach (var context in task.Context)
                                                 {
                                                     <span class="badge badge-secondary">@context</span>
                                                 }
@@ -176,10 +177,10 @@
                                 </div>
 
                                 <div class="col-md-auto my-auto">
-                                    <button class="btn btn-outline-secondary" onclick="@(() => { Edit(item); })">
+                                    <button class="btn btn-outline-secondary" onclick="@(() => { Edit(task); })">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger" onclick="@(() => { Delete(item); })">
+                                    <button class="btn btn-outline-danger" onclick="@(() => { Delete(task); })">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -194,7 +195,7 @@
 
 <div class="row section-row">
     <div class="col">
-        <p class="text-center"><small>v0.3.1</small></p>
+        <p class="text-center"><small>v0.4.0</small></p>
     </div>
 </div>
 
@@ -219,7 +220,7 @@
 </div>
 
 @functions {
-public static List<TaskItem> TodoItems;
+public static TaskList Tasks { get; set; } = new TaskList();
 
 public string CurrentInput { get; set; } = null;
 
@@ -233,33 +234,8 @@ private const string TODO_KEY = "do";
 
 protected override async Task OnInitAsync()
 {
-    TodoItems = await GetTasksFromLocalStorage();
-
+    await GetTasksFromLocalStorage();
     await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
-}
-
-public IEnumerable<string> UniqueProjects()
-{
-    HashSet<string> projects = new HashSet<string>();
-    if (TodoItems != null)
-    {
-        foreach (TaskItem item in TodoItems)
-        {
-            if (item.Completed)
-            {
-                continue;
-            }
-
-            foreach (string p in item.Project)
-            {
-                if (!string.IsNullOrWhiteSpace(p))
-                {
-                    projects.Add(p);
-                }
-            }
-        }
-    }
-    return projects;
 }
 
 public void SelectProject(string project)
@@ -278,29 +254,17 @@ public void SelectProject(string project)
 
 private static async Task SaveItemsInLocalStorage()
 {
-    if (TodoItems != null)
+    string json = Tasks.JsonString;
+    if (!string.IsNullOrWhiteSpace(json))
     {
-        var s = Json.Serialize(TodoItems);
-        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, s });
+        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, json });
     }
 }
 
-private async Task<List<TaskItem>> GetTasksFromLocalStorage()
+private async Task GetTasksFromLocalStorage()
 {
-    var r = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
-    if (r == null)
-    {
-        return new List<TaskItem>();
-    }
-    try
-    {
-        return Json.Deserialize<List<TaskItem>>(r.ToString());
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex);
-        return new List<TaskItem>();
-    }
+    object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
+    Tasks.SetTasks(json);
 }
 
 public async void NewItemForProject(string project)
@@ -328,10 +292,10 @@ public async void AddItem()
         // New task
         else
         {
-            var t = new TaskItem();
-            t.FromLine(CurrentInput);
-            t.Creation = DateTime.Now;
-            TodoItems.Add(t);
+            TaskItem task = new TaskItem();
+            task.FromLine(CurrentInput);
+            task.Creation = DateTime.Now;
+            Tasks.Add(task);
         }
         CurrentInput = null;
         CurrentItem = null;
@@ -366,7 +330,7 @@ public async void Delete(TaskItem item)
             CurrentItem = null;
             CurrentInput = null;
         }
-        TodoItems.Remove(item);
+        Tasks.Remove(item);
     }
     catch (Exception ex)
     {
@@ -412,7 +376,7 @@ public static async void Import(string fileData)
     }
     if (items.Count > 0)
     {
-        TodoItems = items;
+        Tasks.SetTasks(items);
         await SaveItemsInLocalStorage();
         await JSRuntime.Current.InvokeAsync<bool>("reload");
     }
@@ -420,24 +384,10 @@ public static async void Import(string fileData)
 
 public async void Export()
 {
-    if (TodoItems == null || TodoItems.Count < 1)
+    List<string> output = Tasks.Export();
+    if (output != null)
     {
-        return;
+        await JSRuntime.Current.InvokeAsync<bool>("saveToFile", new object[] { output });
     }
-
-    var output = new List<string>();
-    foreach (var item in TodoItems.OrderBy(x => x.Creation))
-    {
-        var l = item.TodoLine();
-        if (!string.IsNullOrWhiteSpace(l))
-        {
-            output.Add(l + "\n");
-        }
-    }
-    if (output.Count < 1)
-    {
-        return;
-    }
-    await JSRuntime.Current.InvokeAsync<bool>("saveToFile", new object[] { output });
 }
 }
