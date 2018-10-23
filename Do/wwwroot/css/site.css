@@ -98,3 +98,30 @@ body {
 .project-btn:focus {
     box-shadow: none !important;
 }
+
+.btn-edit, .btn-incomplete {
+    color: #6c757d;
+    background-color: transparent;
+}
+
+    .btn-edit:hover, .btn-incomplete:hover, .btn-delete:hover, .btn-complete:hover {
+        filter: brightness(75%);
+    }
+
+.btn-delete {
+    color: #dc3545;
+    background-color: transparent;
+}
+
+.btn-complete {
+    color: #28a745;
+    background-color: transparent;
+}
+
+.col-leading {
+    padding-left: 0;
+}
+
+.col-trailing {
+    padding-right: 0;
+}

@@ -88,8 +88,8 @@
                                 <div class="list-group-item">
                                     <div class="container">
                                         <div class="row">
-                                            <div class="col-md-auto my-auto">
-                                                <button class="btn btn-outline-success" onclick="@(() => { Complete(task); })">
+                                            <div class="col-md-auto my-auto col-leading">
+                                                <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </div>
@@ -116,11 +116,11 @@
                                                 </p>
                                             </div>
 
-                                            <div class="col-md-auto my-auto">
-                                                <button class="btn btn-outline-secondary" onclick="@(() => { Edit(task); })">
+                                            <div class="col-md-auto my-auto col-trailing">
+                                                <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <button class="btn btn-outline-danger" onclick="@(() => { Delete(task); })">
+                                                <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
@@ -176,14 +176,14 @@
                                     </p>
                                 </div>
 
-                                <div class="col-md-auto my-auto">
-                                    <button class="btn btn-outline-secondary" onclick="@(() => { Incomplete(task); })">
+                                <div class="col-md-auto my-auto col-trailing">
+                                    <button class="btn btn-incomplete" onclick="@(() => { Incomplete(task); })">
                                         <i class="fas fa-redo"></i>
                                     </button>
-                                    <button class="btn btn-outline-secondary" onclick="@(() => { Edit(task); })">
+                                    <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger" onclick="@(() => { Delete(task); })">
+                                    <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
