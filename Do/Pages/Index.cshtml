@@ -177,6 +177,9 @@
                                 </div>
 
                                 <div class="col-md-auto my-auto">
+                                    <button class="btn btn-outline-secondary" onclick="@(() => { Incomplete(task); })">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
                                     <button class="btn btn-outline-secondary" onclick="@(() => { Edit(task); })">
                                         <i class="fas fa-edit"></i>
                                     </button>
@@ -195,7 +198,7 @@
 
 <div class="row section-row">
     <div class="col">
-        <p class="text-center"><small>v0.4.0</small></p>
+        <p class="text-center"><small>v0.4.1</small></p>
     </div>
 </div>
 
@@ -310,6 +313,12 @@ public async void AddItem()
 public async void Complete(TaskItem item)
 {
     item.Complete();
+    await SaveItemsInLocalStorage();
+}
+
+public async void Incomplete(TaskItem item)
+{
+    item.Incomplete();
     await SaveItemsInLocalStorage();
 }
 
