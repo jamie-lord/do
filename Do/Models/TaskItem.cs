@@ -59,5 +59,11 @@ namespace Do.Models
             Completed = true;
             Completion = DateTime.Now;
         }
+
+        public void Incomplete()
+        {
+            Completed = false;
+            Completion = null;
+        }
     }
 }
