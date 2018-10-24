@@ -5,62 +5,39 @@
 
 <nav id="sidebar">
     <div class="sidebar-header">
-        <h3>Bootstrap Sidebar</h3>
+        <h3>Do</h3>
     </div>
 
     <ul class="list-unstyled components">
-        <p>Dummy Heading</p>
-        <li class="active">
-            <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>
-            <ul class="collapse list-unstyled" id="homeSubmenu">
-                <li>
-                    <a href="#">Home 1</a>
-                </li>
-                <li>
-                    <a href="#">Home 2</a>
-                </li>
-                <li>
-                    <a href="#">Home 3</a>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <a href="#">About</a>
-        </li>
-        <li>
-            <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Pages</a>
-            <ul class="collapse list-unstyled" id="pageSubmenu">
-                <li>
-                    <a href="#">Page 1</a>
-                </li>
-                <li>
-                    <a href="#">Page 2</a>
-                </li>
-                <li>
-                    <a href="#">Page 3</a>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <a href="#">Portfolio</a>
-        </li>
-        <li>
-            <a href="#">Contact</a>
-        </li>
+        @if (Tasks.HasIncompleteTasks)
+        {
+            @foreach (string project in Tasks.Projects)
+            {
+                if (project == SelectedProject)
+                {
+                    <li class="active">
+                        <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
+                    </li>
+                }
+            }
+        }
     </ul>
-
 </nav>
 
 <div id="content">
     <div class="row section-row">
         <div class="col">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                <button type="button" id="sidebarCollapse" class="btn btn-light">
                     <i class="fas fa-align-left"></i>
-                    <span>Toggle Sidebar</span>
                 </button>
 
-                <a class="navbar-brand">Do</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -99,25 +76,6 @@
 
     @if (Tasks.HasIncompleteTasks)
     {
-        @if (Tasks.Projects.Count() > 1)
-        {
-            <div class="row section-row">
-                <div class="col">
-                    @foreach (string project in Tasks.Projects)
-                    {
-                        if (project == SelectedProject)
-                        {
-                            <button type="button" class="btn btn-outline-secondary btn-sm project-btn active" onclick="@(() => { SelectProject(project); })">@project</button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-outline-secondary btn-sm project-btn" onclick="@(() => { SelectProject(project); })">@project</button>
-                        }
-                    }
-                </div>
-            </div>
-        }
-
         <div class="row section-row">
             <div class="col">
                 @foreach (string project in Tasks.Projects)
