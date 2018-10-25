@@ -3,227 +3,234 @@
 @using System.IO;
 @using Models;
 
-<div class="row section-row">
-    <div class="col">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand">Do</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <label class="nav-link btn" style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn" onclick="@Export">Export</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn" data-toggle="modal" data-target="#helpModal">Help</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+<nav id="sidebar" class="@SidebarActive">
+    <div class="sidebar-header">
+        <h3>Do</h3>
     </div>
-</div>
 
-<div class="row section-row">
-    <div class="col">
-        <div class="input-group input-group-lg">
-            <input type="text" class="form-control" id="taskTextArea" placeholder="Take over the world" bind="@CurrentInput" />
-            <div class="input-group-append">
-                <button onclick="@ClearInput" class="btn btn-outline-secondary">
-                    <i class="fas fa-times"></i>
+    <ul class="list-unstyled components">
+        @if (Tasks.HasIncompleteTasks)
+        {
+            @foreach (string project in Tasks.Projects)
+            {
+                <li class="@ProjectActive(project)">
+                    <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
+                </li>
+            }
+        }
+    </ul>
+</nav>
+
+<div id="content" class="@SidebarActive">
+    <div class="row section-row">
+        <div class="col">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <button type="button" id="sidebarCollapse" class="btn btn-light" onclick="@SidebarCollapse">
+                    <i class="fas fa-align-left"></i>
                 </button>
-                <button id="addItemButton" onclick="@AddItem" class="btn btn-outline-primary">@InputButtonText</button>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <label class="nav-link btn" style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn" onclick="@Export">Export</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn" data-toggle="modal" data-target="#helpModal">Help</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row section-row">
+        <div class="col">
+            <div class="input-group input-group-lg">
+                <input type="text" class="form-control" id="taskTextArea" placeholder="Take over the world" bind="@CurrentInput" />
+                <div class="input-group-append">
+                    <button onclick="@ClearInput" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button id="addItemButton" onclick="@AddItem" class="btn btn-outline-primary">@InputButtonText</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
-@if (Tasks.HasIncompleteTasks)
-{
-    @if (Tasks.Projects.Count() > 1)
+    @if (Tasks.HasIncompleteTasks)
     {
         <div class="row section-row">
             <div class="col">
                 @foreach (string project in Tasks.Projects)
                 {
-                    if (project == SelectedProject)
+
+                    @if (SelectedProject == null || (SelectedProject != null && project == SelectedProject))
                     {
-                        <button type="button" class="btn btn-outline-secondary btn-sm project-btn active" onclick="@(() => { SelectProject(project); })">@project</button>
-                    }
-                    else
-                    {
-                        <button type="button" class="btn btn-outline-secondary btn-sm project-btn" onclick="@(() => { SelectProject(project); })">@project</button>
+                        <div class="project-group">
+                            @if (!string.IsNullOrWhiteSpace(project) && project != TaskList.NoProject)
+                            {
+                                <h4 style="display: inline-block;">
+                                    @project <small>
+                                        <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </small>
+                                </h4>
+                            }
+                            <div class="list-group">
+                                @foreach (TaskItem task in Tasks.TasksForProject(project))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-md-auto my-auto col-leading">
+                                                    <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </div>
+
+                                                <div class="col">
+                                                    <p style="margin-bottom: 0;">
+                                                        @if (!string.IsNullOrWhiteSpace(task.Priority))
+                                                        {
+                                                            <span class="badge badge-primary">@task.Priority</span>
+                                                        }
+                                                        @task.Body
+                                                    </p>
+                                                    <p class="task-meta">
+                                                        <small>
+                                                            @task.Creation?.ToString("yyyy-MM-dd")
+                                                            @if (task.Context != null && task.Context.Count > 0)
+                                                            {
+                                                                foreach (var context in task.Context)
+                                                                {
+                                                                    <span class="badge badge-secondary">@context</span>
+                                                                }
+                                                            }
+                                                        </small>
+                                                    </p>
+                                                </div>
+
+                                                <div class="col-md-auto my-auto col-trailing">
+                                                    <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     }
                 }
             </div>
         </div>
     }
 
-    <div class="row section-row">
-        <div class="col">
-            @foreach (string project in Tasks.Projects)
-            {
-
-                @if (SelectedProject == null || (SelectedProject != null && project == SelectedProject))
-                {
-                    <div class="project-group">
-                        @if (!string.IsNullOrWhiteSpace(project) && project != TaskList.NoProject)
-                        {
-                            <h4 style="display: inline-block;">
-                                @project <small>
-                                    <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
-                                        <i class="fas fa-plus"></i>
-                                    </a>
-                                </small>
-                            </h4>
-                        }
-                        <div class="list-group">
-                            @foreach (TaskItem task in Tasks.TasksForProject(project))
-                            {
-                                <div class="list-group-item">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-md-auto my-auto col-leading">
-                                                <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </div>
-
-                                            <div class="col">
-                                                <p style="margin-bottom: 0;">
-                                                    @if (!string.IsNullOrWhiteSpace(task.Priority))
-                                                    {
-                                                        <span class="badge badge-primary">@task.Priority</span>
-                                                    }
-                                                    @task.Body
-                                                </p>
-                                                <p class="task-meta">
-                                                    <small>
-                                                        @task.Creation?.ToString("yyyy-MM-dd")
-                                                        @if (task.Context != null && task.Context.Count > 0)
-                                                        {
-                                                            foreach (var context in task.Context)
-                                                            {
-                                                                <span class="badge badge-secondary">@context</span>
-                                                            }
-                                                        }
-                                                    </small>
-                                                </p>
-                                            </div>
-
-                                            <div class="col-md-auto my-auto col-trailing">
-                                                <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
-            }
+    @if (Tasks.HasCompleteTasks)
+    {
+        <div class="row section-row">
+            <div class="col">
+                <button class="btn btn-outline-secondary btn-block" type="button" data-toggle="collapse" data-target="#collapseCompleted" aria-expanded="false" aria-controls="collapseCompleted">
+                    Completed tasks
+                </button>
+            </div>
         </div>
-    </div>
-}
-
-@if (Tasks.HasCompleteTasks)
-{
-    <div class="row section-row">
-        <div class="col">
-            <button class="btn btn-outline-secondary btn-block" type="button" data-toggle="collapse" data-target="#collapseCompleted" aria-expanded="false" aria-controls="collapseCompleted">
-                Completed tasks
-            </button>
-        </div>
-    </div>
-    <div class="row section-row">
-        <div class="col">
-            <div class="list-group collapse" id="collapseCompleted">
-                @foreach (TaskItem task in Tasks.CompleteTasks)
-                {
-                    <div class="list-group-item">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col">
-                                    <p style="margin-bottom: 0;">
-                                        @if (!string.IsNullOrWhiteSpace(task.Priority))
-                                        {
-                                            <span class="badge badge-primary">@task.Priority</span>
-                                        }
-                                        @task.Body
-                                    </p>
-                                    <p class="task-meta">
-                                        <small>
-                                            @task.Creation?.ToString("yyyy-MM-dd")
-                                            @task.Completion?.ToString("yyyy-MM-dd")
-                                            @if (task.Context != null && task.Context.Count > 0)
+        <div class="row section-row">
+            <div class="col">
+                <div class="list-group collapse" id="collapseCompleted">
+                    @foreach (TaskItem task in Tasks.CompleteTasks)
+                    {
+                        <div class="list-group-item">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col">
+                                        <p style="margin-bottom: 0;">
+                                            @if (!string.IsNullOrWhiteSpace(task.Priority))
                                             {
-                                                foreach (var context in task.Context)
-                                                {
-                                                    <span class="badge badge-secondary">@context</span>
-                                                }
+                                                <span class="badge badge-primary">@task.Priority</span>
                                             }
-                                        </small>
-                                    </p>
-                                </div>
+                                            @task.Body
+                                        </p>
+                                        <p class="task-meta">
+                                            <small>
+                                                @task.Creation?.ToString("yyyy-MM-dd")
+                                                @task.Completion?.ToString("yyyy-MM-dd")
+                                                @if (task.Context != null && task.Context.Count > 0)
+                                                {
+                                                    foreach (var context in task.Context)
+                                                    {
+                                                        <span class="badge badge-secondary">@context</span>
+                                                    }
+                                                }
+                                            </small>
+                                        </p>
+                                    </div>
 
-                                <div class="col-md-auto my-auto col-trailing">
-                                    <button class="btn btn-incomplete" onclick="@(() => { Incomplete(task); })">
-                                        <i class="fas fa-redo"></i>
-                                    </button>
-                                    <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <div class="col-md-auto my-auto col-trailing">
+                                        <button class="btn btn-incomplete" onclick="@(() => { Incomplete(task); })">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                        <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row section-row">
+        <div class="col">
+            <p class="text-center"><small>v0.5.0</small></p>
+        </div>
+    </div>
+
+    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">todo.txt format rules</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="img/todo_format.svg" class="img-fluid" alt="todo.txt format">
+                    <p>For more information on the todo.txt standard see <a href="https://github.com/todotxt/todo.txt">here</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-}
 
-<div class="row section-row">
-    <div class="col">
-        <p class="text-center"><small>v0.4.1</small></p>
-    </div>
-</div>
-
-<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">todo.txt format rules</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <img src="img/todo_format.svg" class="img-fluid" alt="todo.txt format">
-                <p>For more information on the todo.txt standard see <a href="https://github.com/todotxt/todo.txt">here</a>.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 @functions {
 public static TaskList Tasks { get; set; } = new TaskList();
+
+public string SidebarActive { get; private set; } = null;
 
 public string CurrentInput { get; set; } = null;
 
@@ -233,12 +240,35 @@ public string InputButtonText { get; private set; } = "Save";
 
 public string SelectedProject { get; set; } = null;
 
-private const string TODO_KEY = "do";
+private const string DoKey = "do";
+
+private const string Active = "active";
 
 protected override async Task OnInitAsync()
 {
     await GetTasksFromLocalStorage();
     await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
+}
+
+public void SidebarCollapse()
+{
+    if (SidebarActive == Active)
+    {
+        SidebarActive = null;
+    }
+    else
+    {
+        SidebarActive = Active;
+    }
+}
+
+public string ProjectActive(string project)
+{
+    if (project == SelectedProject)
+    {
+        return Active;
+    }
+    return null;
 }
 
 public void SelectProject(string project)
@@ -260,13 +290,13 @@ private static async Task SaveItemsInLocalStorage()
     string json = Tasks.JsonString;
     if (!string.IsNullOrWhiteSpace(json))
     {
-        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, json });
+        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { DoKey, json });
     }
 }
 
 private async Task GetTasksFromLocalStorage()
 {
-    object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
+    object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { DoKey });
     Tasks.SetTasks(json);
 }
 
