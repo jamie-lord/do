@@ -3,7 +3,7 @@
 @using System.IO;
 @using Models;
 
-<nav id="sidebar">
+<nav id="sidebar" class="@SidebarActive">
     <div class="sidebar-header">
         <h3>Do</h3>
     </div>
@@ -30,11 +30,11 @@
     </ul>
 </nav>
 
-<div id="content">
+<div id="content" class="@SidebarActive">
     <div class="row section-row">
         <div class="col">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <button type="button" id="sidebarCollapse" class="btn btn-light">
+                <button type="button" id="sidebarCollapse" class="btn btn-light" onclick="@SidebarCollapse">
                     <i class="fas fa-align-left"></i>
                 </button>
 
@@ -98,7 +98,7 @@
                                 @foreach (TaskItem task in Tasks.TasksForProject(project))
                                 {
                                     <div class="list-group-item">
-                                        <div class="container">
+                                        <div class="container-fluid">
                                             <div class="row">
                                                 <div class="col-md-auto my-auto col-leading">
                                                     <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
@@ -163,7 +163,7 @@
                     @foreach (TaskItem task in Tasks.CompleteTasks)
                     {
                         <div class="list-group-item">
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     <div class="col">
                                         <p style="margin-bottom: 0;">
@@ -239,6 +239,8 @@
 @functions {
 public static TaskList Tasks { get; set; } = new TaskList();
 
+public string SidebarActive { get; private set; } = null;
+
 public string CurrentInput { get; set; } = null;
 
 public TaskItem CurrentItem { get; set; } = null;
@@ -247,12 +249,26 @@ public string InputButtonText { get; private set; } = "Save";
 
 public string SelectedProject { get; set; } = null;
 
-private const string TODO_KEY = "do";
+private const string DoKey = "do";
+
+private const string Active = "active";
 
 protected override async Task OnInitAsync()
 {
     await GetTasksFromLocalStorage();
     await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
+}
+
+public void SidebarCollapse()
+{
+    if (SidebarActive == Active)
+    {
+        SidebarActive = null;
+    }
+    else
+    {
+        SidebarActive = Active;
+    }
 }
 
 public void SelectProject(string project)
@@ -274,13 +290,13 @@ private static async Task SaveItemsInLocalStorage()
     string json = Tasks.JsonString;
     if (!string.IsNullOrWhiteSpace(json))
     {
-        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { TODO_KEY, json });
+        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { DoKey, json });
     }
 }
 
 private async Task GetTasksFromLocalStorage()
 {
-    object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { TODO_KEY });
+    object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { DoKey });
     Tasks.SetTasks(json);
 }
 
