@@ -13,18 +13,9 @@
         {
             @foreach (string project in Tasks.Projects)
             {
-                if (project == SelectedProject)
-                {
-                    <li class="active">
-                        <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
-                    </li>
-                }
-                else
-                {
-                    <li>
-                        <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
-                    </li>
-                }
+                <li class="@ProjectActive(project)">
+                    <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
+                </li>
             }
         }
     </ul>
@@ -269,6 +260,15 @@ public void SidebarCollapse()
     {
         SidebarActive = Active;
     }
+}
+
+public string ProjectActive(string project)
+{
+    if (project == SelectedProject)
+    {
+        return Active;
+    }
+    return null;
 }
 
 public void SelectProject(string project)
