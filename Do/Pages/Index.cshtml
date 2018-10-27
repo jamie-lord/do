@@ -9,7 +9,7 @@
     </div>
 
     <ul class="list-unstyled components">
-        @if (Tasks.HasIncompleteTasks)
+        @if (Tasks.HasIncompleteTasks && Tasks.Projects.Count() > 1)
         {
             @foreach (string project in Tasks.Projects)
             {
