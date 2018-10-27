@@ -9,14 +9,11 @@
     </div>
 
     <ul class="list-unstyled components">
-        @if (Tasks.HasIncompleteTasks && Tasks.Projects.Count() > 1)
+        @foreach (string project in Tasks.Projects)
         {
-            @foreach (string project in Tasks.Projects)
-            {
-                <li class="@ProjectActive(project)">
-                    <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
-                </li>
-            }
+            <li class="@ProjectActive(project)">
+                <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
+            </li>
         }
     </ul>
 </nav>
@@ -64,140 +61,85 @@
         </div>
     </div>
 
-
-    @if (Tasks.HasIncompleteTasks)
-    {
-        <div class="row section-row">
-            <div class="col">
-                @foreach (string project in Tasks.Projects)
-                {
-
-                    @if (SelectedProject == null || (SelectedProject != null && project == SelectedProject))
+    <div class="row section-row">
+        <div class="col">
+            @foreach (string project in ProjectsToShow)
+            {
+                <div class="project-group">
+                    @if (!string.IsNullOrWhiteSpace(project) && project != TaskList.NoProject)
                     {
-                        <div class="project-group">
-                            @if (!string.IsNullOrWhiteSpace(project) && project != TaskList.NoProject)
+                        <h4 style="display: inline-block;">
+                            @project
+                            @if (project != TaskList.CompletedTasks)
                             {
-                                <h4 style="display: inline-block;">
-                                    @project <small>
-                                        <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
-                                            <i class="fas fa-plus"></i>
-                                        </a>
-                                    </small>
-                                </h4>
+                                <small>
+                                    <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </small>
                             }
-                            <div class="list-group">
-                                @foreach (TaskItem task in Tasks.TasksForProject(project))
-                                {
-                                    <div class="list-group-item">
-                                        <div class="container-fluid">
-                                            <div class="row">
-                                                <div class="col-md-auto my-auto col-leading">
-                                                    <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                </div>
-
-                                                <div class="col">
-                                                    <p style="margin-bottom: 0;">
-                                                        @if (!string.IsNullOrWhiteSpace(task.Priority))
-                                                        {
-                                                            <span class="badge badge-primary">@task.Priority</span>
-                                                        }
-                                                        @task.Body
-                                                    </p>
-                                                    <p class="task-meta">
-                                                        <small>
-                                                            @task.Creation?.ToString("yyyy-MM-dd")
-                                                            @if (task.Context != null && task.Context.Count > 0)
-                                                            {
-                                                                foreach (var context in task.Context)
-                                                                {
-                                                                    <span class="badge badge-secondary">@context</span>
-                                                                }
-                                                            }
-                                                        </small>
-                                                    </p>
-                                                </div>
-
-                                                <div class="col-md-auto my-auto col-trailing">
-                                                    <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
+                        </h4>
                     }
-                }
-            </div>
-        </div>
-    }
+                    <div class="list-group">
+                        @foreach (TaskItem task in Tasks.TasksForProject(project))
+                        {
+                            <div class="list-group-item">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        @if (project != TaskList.CompletedTasks)
+                                        {
+                                            <div class="col-md-auto my-auto col-leading">
+                                                <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </div>
+                                        }
 
-    @if (Tasks.HasCompleteTasks)
-    {
-        <div class="row section-row">
-            <div class="col">
-                <button class="btn btn-outline-secondary btn-block" type="button" data-toggle="collapse" data-target="#collapseCompleted" aria-expanded="false" aria-controls="collapseCompleted">
-                    Completed tasks
-                </button>
-            </div>
-        </div>
-        <div class="row section-row">
-            <div class="col">
-                <div class="list-group collapse" id="collapseCompleted">
-                    @foreach (TaskItem task in Tasks.CompleteTasks)
-                    {
-                        <div class="list-group-item">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col">
-                                        <p style="margin-bottom: 0;">
-                                            @if (!string.IsNullOrWhiteSpace(task.Priority))
-                                            {
-                                                <span class="badge badge-primary">@task.Priority</span>
-                                            }
-                                            @task.Body
-                                        </p>
-                                        <p class="task-meta">
-                                            <small>
-                                                @task.Creation?.ToString("yyyy-MM-dd")
-                                                @task.Completion?.ToString("yyyy-MM-dd")
-                                                @if (task.Context != null && task.Context.Count > 0)
+                                        <div class="col">
+                                            <p style="margin-bottom: 0;">
+                                                @if (!string.IsNullOrWhiteSpace(task.Priority))
                                                 {
-                                                    foreach (var context in task.Context)
-                                                    {
-                                                        <span class="badge badge-secondary">@context</span>
-                                                    }
+                                                    <span class="badge badge-primary">@task.Priority</span>
                                                 }
-                                            </small>
-                                        </p>
-                                    </div>
+                                                @task.Body
+                                            </p>
+                                            <p class="task-meta">
+                                                <small>
+                                                    @task.Creation?.ToString("yyyy-MM-dd")
+                                                    @if (task.Context != null && task.Context.Count > 0)
+                                                    {
+                                                        foreach (var context in task.Context)
+                                                        {
+                                                            <span class="badge badge-secondary">@context</span>
+                                                        }
+                                                    }
+                                                </small>
+                                            </p>
+                                        </div>
 
-                                    <div class="col-md-auto my-auto col-trailing">
-                                        <button class="btn btn-incomplete" onclick="@(() => { Incomplete(task); })">
-                                            <i class="fas fa-redo"></i>
-                                        </button>
-                                        <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <div class="col-md-auto my-auto col-trailing">
+                                            @if (project == TaskList.CompletedTasks)
+                                            {
+                                                <button class="btn btn-incomplete" onclick="@(() => { Incomplete(task); })">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            }
+                                            <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         </div>
-    }
+    </div>
 
     <div class="row section-row">
         <div class="col">
@@ -259,6 +201,30 @@ public void SidebarCollapse()
     else
     {
         SidebarActive = Active;
+    }
+}
+
+public IEnumerable<string> ProjectsToShow
+{
+    get
+    {
+        List<string> projects = new List<string>();
+        if (SelectedProject != null)
+        {
+            projects.Add(SelectedProject);
+        }
+        else
+        {
+            foreach (string project in Tasks.Projects)
+            {
+                if (project == TaskList.CompletedTasks)
+                {
+                    continue;
+                }
+                projects.Add(project);
+            }
+        }
+        return projects;
     }
 }
 
@@ -344,12 +310,22 @@ public async void Complete(TaskItem item)
 {
     item.Complete();
     await SaveItemsInLocalStorage();
+
+    if (!Tasks.HasIncompleteTasks)
+    {
+        SelectProject(null);
+    }
 }
 
 public async void Incomplete(TaskItem item)
 {
     item.Incomplete();
     await SaveItemsInLocalStorage();
+
+    if (!Tasks.HasCompleteTasks)
+    {
+        SelectProject(null);
+    }
 }
 
 public async void Edit(TaskItem item)
@@ -376,6 +352,11 @@ public async void Delete(TaskItem item)
         Console.WriteLine(ex);
     }
     await SaveItemsInLocalStorage();
+
+    if (!Tasks.HasAnyTasks)
+    {
+        SelectProject(null);
+    }
 }
 
 public void ClearInput()

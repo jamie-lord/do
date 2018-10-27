@@ -12,6 +12,8 @@ namespace Do
 
         public static string NoProject { get; } = "No project";
 
+        public static string CompletedTasks { get; } = "Completed tasks";
+
         public void SetTasks(List<TaskItem> tasks)
         {
             _todoItems = tasks;
@@ -45,6 +47,18 @@ namespace Do
         public void Remove(TaskItem task)
         {
             _todoItems?.Remove(task);
+        }
+
+        public bool HasAnyTasks
+        {
+            get
+            {
+                if (_todoItems == null)
+                {
+                    return false;
+                }
+                return _todoItems.Count > 0;
+            }
         }
 
         public bool HasIncompleteTasks
@@ -116,6 +130,11 @@ namespace Do
                     {
                         projects.Insert(0, NoProject);
                     }
+
+                    if (CompleteTasks?.Count() > 0)
+                    {
+                        projects.Add(CompletedTasks);
+                    }
                 }
                 return projects;
             }
@@ -126,6 +145,11 @@ namespace Do
             if (project == NoProject)
             {
                 return TasksWithNoProject;
+            }
+
+            if (project == CompletedTasks)
+            {
+                return CompleteTasks;
             }
 
             return _todoItems?.Where(x => !x.Completed && x.Project.Contains(project));
