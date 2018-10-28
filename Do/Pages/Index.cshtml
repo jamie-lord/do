@@ -248,6 +248,7 @@ public void SelectProject(string project)
     {
         SelectedProject = project;
     }
+    StateHasChanged();
 }
 
 private static async Task SaveItemsInLocalStorage()
