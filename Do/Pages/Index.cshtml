@@ -12,7 +12,7 @@
         @foreach (string project in Tasks.Projects)
         {
             <li class="@ProjectActive(project)">
-                <a href="javascript:void(0)" role="button" onclick="@(() => { SelectProject(project); })">@project</a>
+                <a href="javascript:void(0)" role="button" onclick="@(async () => { await SelectProject(project); })">@project</a>
             </li>
         }
     </ul>
@@ -190,6 +190,7 @@ protected override async Task OnInitAsync()
 {
     await GetTasksFromLocalStorage();
     await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
+    await UpdatePageTitle();
 }
 
 public void SidebarCollapse()
@@ -202,6 +203,47 @@ public void SidebarCollapse()
     {
         SidebarActive = Active;
     }
+}
+
+private async Task UpdatePageTitle()
+{
+    int taskCount = 0;
+
+    string title = "Do";
+    bool showingCompletedTasks = false;
+
+    foreach (var project in ProjectsToShow)
+    {
+        taskCount = taskCount + Tasks.TasksForProject(project).Count();
+
+        if (project == TaskList.CompletedTasks)
+        {
+            showingCompletedTasks = true;
+        }
+    }
+
+    if (taskCount > 0)
+    {
+        if (taskCount == 1)
+        {
+            title = $"{taskCount} Task";
+        }
+        else if (taskCount > 1)
+        {
+            title = $"{taskCount} Tasks";
+        }
+
+        if (showingCompletedTasks)
+        {
+            title += " Done";
+        }
+        else
+        {
+            title += " To Do";
+        }
+    }
+
+    await JSRuntime.Current.InvokeAsync<object>("setPageTitle", new object[] { title });
 }
 
 public IEnumerable<string> ProjectsToShow
@@ -237,7 +279,7 @@ public string ProjectActive(string project)
     return null;
 }
 
-public void SelectProject(string project)
+public async Task SelectProject(string project)
 {
     // Project is currently selected and should be set to no project to display all projects.
     if (project == SelectedProject)
@@ -248,6 +290,7 @@ public void SelectProject(string project)
     {
         SelectedProject = project;
     }
+    await UpdatePageTitle();
     StateHasChanged();
 }
 
@@ -304,6 +347,7 @@ public async void AddItem()
         Console.WriteLine(ex);
     }
     await SaveItemsInLocalStorage();
+    await UpdatePageTitle();
 }
 
 public async void Complete(TaskItem item)
@@ -313,8 +357,10 @@ public async void Complete(TaskItem item)
 
     if (!Tasks.HasIncompleteTasks)
     {
-        SelectProject(null);
+        await SelectProject(null);
     }
+
+    await UpdatePageTitle();
 }
 
 public async void Incomplete(TaskItem item)
@@ -324,8 +370,10 @@ public async void Incomplete(TaskItem item)
 
     if (!Tasks.HasCompleteTasks)
     {
-        SelectProject(null);
+        await SelectProject(null);
     }
+
+    await UpdatePageTitle();
 }
 
 public async void Edit(TaskItem item)
@@ -355,8 +403,10 @@ public async void Delete(TaskItem item)
 
     if (!Tasks.HasAnyTasks)
     {
-        SelectProject(null);
+        await SelectProject(null);
     }
+
+    await UpdatePageTitle();
 }
 
 public void ClearInput()

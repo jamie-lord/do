@@ -59,6 +59,11 @@
             return true;
         };
 
+        window.setPageTitle = (title) => {
+            document.title = title;
+            return true;
+        };
+
         window.addEventListeners = async () => {
             document.getElementById('import-button').addEventListener('change', async function () {
                 let file = this.children[0].files[0];
