@@ -83,57 +83,7 @@
                     <div class="list-group">
                         @foreach (TaskItem task in Tasks.TasksForProject(project))
                         {
-                            <div class="list-group-item">
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        @if (project != TaskList.CompletedTasks)
-                                        {
-                                            <div class="col-md-auto my-auto col-leading">
-                                                <button class="btn btn-complete" onclick="@(() => { Complete(task); })">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </div>
-                                        }
-
-                                        <div class="col">
-                                            <p style="margin-bottom: 0;">
-                                                @if (!string.IsNullOrWhiteSpace(task.Priority))
-                                                {
-                                                    <span class="badge badge-primary">@task.Priority</span>
-                                                }
-                                                @task.Body
-                                            </p>
-                                            <p class="task-meta">
-                                                <small>
-                                                    @task.Creation?.ToString("yyyy-MM-dd")
-                                                    @if (task.Context != null && task.Context.Count > 0)
-                                                    {
-                                                        foreach (var context in task.Context)
-                                                        {
-                                                            <span class="badge badge-secondary">@context</span>
-                                                        }
-                                                    }
-                                                </small>
-                                            </p>
-                                        </div>
-
-                                        <div class="col-md-auto my-auto col-trailing">
-                                            @if (project == TaskList.CompletedTasks)
-                                            {
-                                                <button class="btn btn-incomplete" onclick="@(() => { Incomplete(task); })">
-                                                    <i class="fas fa-redo"></i>
-                                                </button>
-                                            }
-                                            <button class="btn btn-edit" onclick="@(() => { Edit(task); })">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-delete" onclick="@(() => { Delete(task); })">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <TaskComponent Task="@task" Project="@project" Complete="@((t) => Complete(t))" Incomplete="@((t) => Incomplete(t))" Edit="@((t) => Edit(t))" Delete="@((t) => Delete(t))" />
                         }
                     </div>
                 </div>
@@ -348,6 +298,7 @@ public async void AddItem()
     }
     await SaveItemsInLocalStorage();
     await UpdatePageTitle();
+    StateHasChanged();
 }
 
 public async void Complete(TaskItem item)
@@ -361,6 +312,7 @@ public async void Complete(TaskItem item)
     }
 
     await UpdatePageTitle();
+    StateHasChanged();
 }
 
 public async void Incomplete(TaskItem item)
@@ -374,6 +326,7 @@ public async void Incomplete(TaskItem item)
     }
 
     await UpdatePageTitle();
+    StateHasChanged();
 }
 
 public async void Edit(TaskItem item)
@@ -382,6 +335,7 @@ public async void Edit(TaskItem item)
     CurrentInput = CurrentItem.TodoLine();
     InputButtonText = "Update";
     await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
+    StateHasChanged();
 }
 
 public async void Delete(TaskItem item)
@@ -407,6 +361,7 @@ public async void Delete(TaskItem item)
     }
 
     await UpdatePageTitle();
+    StateHasChanged();
 }
 
 public void ClearInput()

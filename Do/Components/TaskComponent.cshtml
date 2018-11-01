@@ -1,0 +1,73 @@
+﻿@using Models;
+
+<div class="list-group-item">
+    <div class="container-fluid">
+        <div class="row">
+            @if (Project != TaskList.CompletedTasks)
+            {
+                <div class="col-md-auto my-auto col-leading">
+                    <button class="btn btn-complete" onclick="@(() => { Complete?.Invoke(Task); })">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            }
+
+            <div class="col">
+                <p style="margin-bottom: 0;">
+                    @if (!string.IsNullOrWhiteSpace(Task.Priority))
+                    {
+                        <span class="badge badge-primary">@Task.Priority</span>
+                    }
+                    @Task.Body
+                </p>
+                <p class="task-meta">
+                    <small>
+                        @Task.Creation?.ToString("yyyy-MM-dd")
+                        @if (Task.Context != null && Task.Context.Count > 0)
+                        {
+                            foreach (var context in Task.Context)
+                            {
+                                <span class="badge badge-secondary">@context</span>
+                            }
+                        }
+                    </small>
+                </p>
+            </div>
+
+            <div class="col-md-auto my-auto col-trailing">
+                @if (Project == TaskList.CompletedTasks)
+                {
+                    <button class="btn btn-incomplete" onclick="@(() => { Incomplete?.Invoke(Task); })">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                }
+                <button class="btn btn-edit" onclick="@(() => { Edit?.Invoke(Task); })">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-delete" onclick="@(() => { Delete?.Invoke(Task); })">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+[Parameter]
+private TaskItem Task { get; set; }
+
+[Parameter]
+private string Project { get; set; }
+
+[Parameter]
+private Action<TaskItem> Complete { get; set; }
+
+[Parameter]
+private Action<TaskItem> Incomplete { get; set; }
+
+[Parameter]
+private Action<TaskItem> Edit { get; set; }
+
+[Parameter]
+private Action<TaskItem> Delete { get; set; }
+}
