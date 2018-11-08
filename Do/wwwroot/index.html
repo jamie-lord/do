@@ -64,6 +64,11 @@
             return true;
         };
 
+        window.looseFocus = () => {
+            document.activeElement.blur();
+            return true;
+        };
+
         window.addEventListeners = async () => {
             document.getElementById('import-button').addEventListener('change', async function () {
                 let file = this.children[0].files[0];
