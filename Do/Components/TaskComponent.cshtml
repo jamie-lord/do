@@ -25,7 +25,7 @@
                         @Task.Creation?.ToString("yyyy-MM-dd")
                         @if (Task.Context != null && Task.Context.Count > 0)
                         {
-                            foreach (var context in Task.Context)
+                            foreach (var context in Task.Context.OrderBy(x => x))
                             {
                                 <span class="badge badge-secondary">@context</span>
                             }
