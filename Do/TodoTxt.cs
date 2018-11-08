@@ -7,30 +7,30 @@ namespace Do
     public static class TodoTxt
     {
         /// <summary>
-        ///     Parse a string line to the TodoItem
+        /// Parse a string line to the TodoItem
         /// </summary>
         /// <param name="line">String line</param>
         /// <returns>TodoItem</returns>
         public static TaskItem Parse(string line)
         {
-            var entry = new TaskItem();
+            TaskItem task = new TaskItem();
             // Completed
             if (Regex.IsMatch(line, "^x (.*)$"))
             {
-                entry.Completed = true;
+                task.Completed = true;
                 // Remove the completion mark
                 line = Regex.Replace(line, "^x (.*)$", "$1");
             }
             else
             {
-                entry.Completed = false;
+                task.Completed = false;
             }
 
             // Priority
             if (Regex.IsMatch(line, "^\\(.\\) (.*)$"))
             {
                 var priority = Regex.Match(line, "^\\((.)\\)");
-                entry.Priority = priority.Groups[1].ToString();
+                task.Priority = priority.Groups[1].ToString();
                 line = Regex.Replace(line, "^\\(.\\) (.*)$", "$1");
             }
 
@@ -40,27 +40,31 @@ namespace Do
                 // Completion and Creation
                 var result = Regex.Matches(line, ".{4}-.{2}-.{2}");
 
-                entry.Completion = DateTime.Parse(result[0].ToString());
-                entry.Creation = DateTime.Parse(result[1].ToString());
+                task.Completion = DateTime.Parse(result[0].ToString());
+                task.Creation = DateTime.Parse(result[1].ToString());
                 line = Regex.Replace(line, "^.{4}-.{2}-.{2} .{4}-.{2}-.{2} (.*)$", "$1");
             }
             else if (Regex.IsMatch(line, "^(.{4}-.{2}-.{2}) (.*)$"))
             {
                 // Creation only
                 var result = Regex.Matches(line, "^.{4}-.{2}-.{2}");
-                entry.Creation = DateTime.Parse(result[0].ToString());
+                task.Creation = DateTime.Parse(result[0].ToString());
                 line = Regex.Replace(line, "^.{4}-.{2}-.{2} (.*)$", "$1");
             }
 
             //// Context
             foreach (var item in Regex.Matches(line, "@([^\\s]*)"))
-                entry.Context.Add(item.ToString().Replace("@", "").Trim());
+            {
+                task.Context.Add(item.ToString().Replace("@", "").Trim());
+            }
 
             line = Regex.Replace(line, "@([^\\s]*)", "").Trim();
 
             //// Project
             foreach (var item in Regex.Matches(line, "\\+([^\\s]*)"))
-                entry.Project.Add(item.ToString().Replace("+", "").Trim());
+            {
+                task.Project.Add(item.ToString().Replace("+", "").Trim());
+            }
 
             line = Regex.Replace(line, "\\+([^\\s]*)", "").Trim();
 
@@ -68,14 +72,14 @@ namespace Do
             foreach (var item in Regex.Matches(line, "([^\\s]*?)\\:([^\\s]*)"))
             {
                 var result = Regex.Match(item.ToString(), "([^\\s]*?)\\:([^\\s]*)");
-                entry.Meta.Add(result.Groups[1].ToString(), result.Groups[2].ToString());
+                task.Meta.Add(result.Groups[1].ToString(), result.Groups[2].ToString());
             }
 
             line = Regex.Replace(line, "([^\\s]*?)\\:([^\\s]*)", "").Trim();
 
-            entry.Body = line;
+            task.Body = line;
 
-            return entry;
+            return task;
         }
 
         /// <summary>
@@ -85,10 +89,13 @@ namespace Do
         /// <returns>String representation of the TodoItem</returns>
         public static string GenerateTodoLine(TaskItem item)
         {
-            var output = "";
+            string output = "";
 
             // Completion marker
-            if (item.Completed) output += "x ";
+            if (item.Completed)
+            {
+                output += "x ";
+            }
 
             if (!string.IsNullOrWhiteSpace(item.Priority))
             {
@@ -108,13 +115,22 @@ namespace Do
             output += item.Body + " ";
 
             //// Context
-            foreach (var context in item.Context) output += "@" + context + " ";
+            foreach (var context in item.Context)
+            {
+                output += "@" + context + " ";
+            }
 
             //// Project
-            foreach (var project in item.Project) output += "+" + project + " ";
+            foreach (var project in item.Project)
+            {
+                output += "+" + project + " ";
+            }
 
             //// Meta
-            foreach (var meta in item.Meta) output += meta.Key + ":" + meta.Value + " ";
+            foreach (var meta in item.Meta)
+            {
+                output += meta.Key + ":" + meta.Value + " ";
+            }
 
             return output.Trim();
         }
