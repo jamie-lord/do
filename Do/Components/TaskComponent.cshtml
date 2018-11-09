@@ -35,18 +35,26 @@
             </div>
 
             <div class="col-md-auto my-auto col-trailing">
-                @if (Project == TaskList.CompletedTasks)
-                {
-                    <button class="btn btn-incomplete btn-collapsible" onclick="@(() => { Incomplete?.Invoke(Task); })">
-                        <i class="fas fa-redo"></i> <span>Restart</span>
+
+                <div class="dropleft">
+                    <button type="button" class="btn btn-task-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-h"></i>
                     </button>
-                }
-                <button class="btn btn-edit btn-collapsible" onclick="@(() => { Edit?.Invoke(Task); })">
-                    <i class="fas fa-edit"></i> <span>Edit</span>
-                </button>
-                <button class="btn btn-delete btn-collapsible" onclick="@(() => { Delete?.Invoke(Task); })">
-                    <i class="fas fa-trash"></i> <span>Delete</span>
-                </button>
+                    <div class="dropdown-menu">
+                        @if (Project == TaskList.CompletedTasks)
+                        {
+                            <button class="dropdown-item" onclick="@(() => { Incomplete?.Invoke(Task); })">
+                                <i class="fas fa-redo"></i> Restart
+                            </button>
+                        }
+                        <button class="dropdown-item" onclick="@(() => { Edit?.Invoke(Task); })">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="dropdown-item" onclick="@(() => { Delete?.Invoke(Task); })">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -99,19 +99,18 @@ body {
     box-shadow: none !important;
 }
 
-.btn-edit, .btn-incomplete {
+.btn-task-options {
     color: #6c757d;
     background-color: transparent;
 }
 
-    .btn-edit:hover, .btn-incomplete:hover, .btn-delete:hover, .btn-complete:hover {
-        filter: brightness(75%);
+    .btn-task-options:focus {
+        box-shadow: none;
     }
 
-.btn-delete {
-    color: #dc3545;
-    background-color: transparent;
-}
+    .btn-task-options:hover, .btn-complete:hover {
+        filter: brightness(75%);
+    }
 
 .btn-complete {
     color: #28a745;
