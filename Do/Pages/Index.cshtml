@@ -412,7 +412,7 @@ public async void Import(string fileData)
 
         Tasks.SetTasks(items);
         await SaveItemsInLocalStorage();
-        await JSRuntime.Current.InvokeAsync<bool>("reload");
+        StateHasChanged();
     }
 }
 
