@@ -298,7 +298,7 @@ public async void AddItem()
     }
     await SaveItemsInLocalStorage();
     await UpdatePageTitle();
-    await JSRuntime.Current.InvokeAsync<bool>("looseFocus");
+    await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
     StateHasChanged();
 }
 
