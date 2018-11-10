@@ -2,6 +2,7 @@
 @using Microsoft.JSInterop;
 @using System.IO;
 @using Models;
+@inject TaskList Tasks
 
 <nav id="sidebar" class="@SidebarActive">
     <div class="sidebar-header">
@@ -120,8 +121,6 @@
 </div>
 
 @functions {
-public static TaskList Tasks { get; set; } = new TaskList();
-
 public string SidebarActive { get; private set; } = null;
 
 public string CurrentInput { get; set; } = null;
@@ -138,8 +137,12 @@ private const string Active = "active";
 
 protected override async Task OnInitAsync()
 {
+    if (Tasks == null)
+    {
+        Console.WriteLine($"Tasks are null :(");
+    }
     await GetTasksFromLocalStorage();
-    await JSRuntime.Current.InvokeAsync<bool>("addEventListeners");
+    await JSRuntime.Current.InvokeAsync<bool>("addEventListeners", new object[] { new DotNetObjectRef(this) });
     await UpdatePageTitle();
 }
 
@@ -244,7 +247,7 @@ public async Task SelectProject(string project)
     StateHasChanged();
 }
 
-private static async Task SaveItemsInLocalStorage()
+private async Task SaveItemsInLocalStorage()
 {
     string json = Tasks.JsonString;
     if (!string.IsNullOrWhiteSpace(json))
@@ -377,7 +380,7 @@ public async void ClearInput()
 }
 
 [JSInvokable]
-public static async void Import(string fileData)
+public async void Import(string fileData)
 {
     if (string.IsNullOrWhiteSpace(fileData))
     {
@@ -406,6 +409,7 @@ public static async void Import(string fileData)
     }
     if (items.Count > 0)
     {
+
         Tasks.SetTasks(items);
         await SaveItemsInLocalStorage();
         await JSRuntime.Current.InvokeAsync<bool>("reload");

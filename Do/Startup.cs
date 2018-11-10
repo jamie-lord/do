@@ -7,6 +7,7 @@ namespace Do
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<TaskList>();
         }
 
         public void Configure(IBlazorApplicationBuilder app)

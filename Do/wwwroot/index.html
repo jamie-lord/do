@@ -69,27 +69,12 @@
             return true;
         };
 
-        window.addEventListeners = async () => {
+        window.addEventListeners = async (componentObjectRef) => {
             document.getElementById('import-button').addEventListener('change', async function () {
                 let file = this.children[0].files[0];
                 let reader = new FileReader();
                 reader.onloadend = async function callback(e) {
-                    let result = e.target.result;
-                    const assemblyName = 'Do';
-                    const namespace = 'Do.Pages';
-                    const typeName = 'Index';
-                    const methodName = 'Import';
-
-                    const importMethod = Blazor.platform.findMethod(
-                        assemblyName,
-                        namespace,
-                        typeName,
-                        methodName
-                    );
-
-                    let data = Blazor.platform.toDotNetString(result);
-
-                    Blazor.platform.callMethod(importMethod, null, [data]);
+                    await componentObjectRef.invokeMethodAsync('Import', e.target.result);
                 };
                 reader.readAsText(file);
             });
