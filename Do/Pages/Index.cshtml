@@ -413,6 +413,7 @@ public async void Import(string fileData)
 
         Tasks.SetTasks(items);
         await SaveItemsInLocalStorage();
+        await SelectProject(null);
         StateHasChanged();
     }
 }
