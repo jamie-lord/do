@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Do
+namespace Do.Services
 {
-    public class TaskList
+    public class TaskService
     {
         private List<TaskItem> _todoItems;
 

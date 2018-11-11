@@ -2,7 +2,8 @@
 @using Microsoft.JSInterop;
 @using System.IO;
 @using Models;
-@inject TaskList Tasks
+@using Services
+@inject TaskService Tasks
 
 <nav id="sidebar" class="@SidebarActive">
     <div class="sidebar-header">
@@ -67,11 +68,11 @@
             @foreach (string project in ProjectsToShow)
             {
                 <div class="project-group">
-                    @if (!string.IsNullOrWhiteSpace(project) && project != TaskList.NoProject)
+                    @if (!string.IsNullOrWhiteSpace(project) && project != TaskService.NoProject)
                     {
                         <h4 style="display: inline-block;">
                             @project
-                            @if (project != TaskList.CompletedTasks)
+                            @if (project != TaskService.CompletedTasks)
                             {
                                 <small>
                                     <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
@@ -169,7 +170,7 @@ private async Task UpdatePageTitle()
     {
         taskCount = taskCount + Tasks.TasksForProject(project).Count();
 
-        if (project == TaskList.CompletedTasks)
+        if (project == TaskService.CompletedTasks)
         {
             showingCompletedTasks = true;
         }
@@ -212,7 +213,7 @@ public IEnumerable<string> ProjectsToShow
         {
             foreach (string project in Tasks.Projects)
             {
-                if (project == TaskList.CompletedTasks)
+                if (project == TaskService.CompletedTasks)
                 {
                     continue;
                 }

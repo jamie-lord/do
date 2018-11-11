@@ -1,3 +1,4 @@
+using Do.Services;
 using Microsoft.AspNetCore.Blazor.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,7 +8,7 @@ namespace Do
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<TaskList>();
+            services.AddSingleton<TaskService>();
         }
 
         public void Configure(IBlazorApplicationBuilder app)

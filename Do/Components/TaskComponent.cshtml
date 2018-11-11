@@ -1,9 +1,10 @@
 ﻿@using Models;
+@using Services;
 
 <div class="list-group-item">
     <div class="container-fluid">
         <div class="row">
-            @if (Project != TaskList.CompletedTasks)
+            @if (Project != TaskService.CompletedTasks)
             {
                 <div class="col-md-auto my-auto col-leading">
                     <button class="btn btn-complete btn-collapsible" onclick="@(() => { Complete?.Invoke(Task); })">
@@ -41,7 +42,7 @@
                         <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu">
-                        @if (Project == TaskList.CompletedTasks)
+                        @if (Project == TaskService.CompletedTasks)
                         {
                             <button class="dropdown-item" onclick="@(() => { Incomplete?.Invoke(Task); })">
                                 <i class="fas fa-redo"></i> Restart
