@@ -169,14 +169,15 @@ a:focus {
         padding: 10px;
     }
 
-    #sidebar ul li a {
+    #sidebar ul li a, #sidebar ul li label {
         padding: 10px;
         font-size: 1.1em;
         display: block;
     }
 
-        #sidebar ul li a:hover {
+        #sidebar ul li a:hover, #sidebar ul li label:hover {
             background: #fff;
+            cursor: pointer;
         }
 
     #sidebar ul li.active > a,
@@ -213,15 +214,8 @@ ul.CTAs {
         margin-bottom: 5px;
     }
 
-a.download {
-    background: #fff;
-    color: #7386D5;
-}
-
-a.article,
-a.article:hover {
-    background: #6d7fcc !important;
-    color: #fff !important;
+.version-number {
+    padding: 10px;
 }
 
 #content {

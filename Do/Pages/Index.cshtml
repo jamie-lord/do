@@ -10,14 +10,34 @@
         <h3>Do</h3>
     </div>
 
+    @if (Tasks.Projects.Any())
+    {
+        <ul class="list-unstyled components">
+            @foreach (string project in Tasks.Projects)
+            {
+                <li class="@ProjectActive(project)">
+                    <a role="button" onclick="@(async () => { await SelectProject(project); })">@project</a>
+                </li>
+            }
+        </ul>
+    }
+
     <ul class="list-unstyled components">
-        @foreach (string project in Tasks.Projects)
+        <li>
+            <label style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
+        </li>
+        @if (Tasks.HasAnyTasks)
         {
-            <li class="@ProjectActive(project)">
-                <a href="javascript:void(0)" role="button" onclick="@(async () => { await SelectProject(project); })">@project</a>
+            <li>
+                <a onclick="@Export">Export</a>
             </li>
         }
+        <li>
+            <a data-toggle="modal" data-target="#helpModal">Help</a>
+        </li>
     </ul>
+
+    <p class="version-number"><small>v0.8.0</small></p>
 </nav>
 
 <div id="content" class="@SidebarActive">
@@ -27,24 +47,6 @@
                 <button type="button" id="sidebarCollapse" class="btn btn-light" onclick="@SidebarCollapse">
                     <i class="fas fa-align-left"></i>
                 </button>
-
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <label class="nav-link btn" style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn" onclick="@Export">Export</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn" data-toggle="modal" data-target="#helpModal">Help</a>
-                        </li>
-                    </ul>
-                </div>
             </nav>
         </div>
     </div>
@@ -90,12 +92,6 @@
                     </div>
                 </div>
             }
-        </div>
-    </div>
-
-    <div class="row section-row">
-        <div class="col">
-            <p class="text-center"><small>v0.8.0</small></p>
         </div>
     </div>
 
