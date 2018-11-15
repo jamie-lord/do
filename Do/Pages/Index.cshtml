@@ -128,17 +128,11 @@ public string InputButtonText { get; private set; } = "Save";
 
 public string SelectedProject { get; set; } = null;
 
-private const string DoKey = "do";
-
 private const string Active = "active";
 
 protected override async Task OnInitAsync()
 {
-    if (Tasks == null)
-    {
-        Console.WriteLine($"Tasks are null :(");
-    }
-    await GetTasksFromLocalStorage();
+    await Tasks.Init();
     await JSRuntime.Current.InvokeAsync<bool>("addEventListeners", new object[] { new DotNetObjectRef(this) });
     await UpdatePageTitle();
 }
@@ -244,21 +238,6 @@ public async Task SelectProject(string project)
     StateHasChanged();
 }
 
-private async Task SaveItemsInLocalStorage()
-{
-    string json = Tasks.JsonString;
-    if (!string.IsNullOrWhiteSpace(json))
-    {
-        await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { DoKey, json });
-    }
-}
-
-private async Task GetTasksFromLocalStorage()
-{
-    object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { DoKey });
-    Tasks.SetTasks(json);
-}
-
 public async void NewItemForProject(string project)
 {
     ClearInput();
@@ -287,7 +266,7 @@ public async void AddItem()
             TaskItem task = new TaskItem();
             task.FromLine(CurrentInput);
             task.Creation = DateTime.Now;
-            Tasks.Add(task);
+            await Tasks.Add(task);
         }
         CurrentInput = null;
         CurrentItem = null;
@@ -296,16 +275,14 @@ public async void AddItem()
     {
         Console.WriteLine(ex);
     }
-    await SaveItemsInLocalStorage();
     await UpdatePageTitle();
     await JSRuntime.Current.InvokeAsync<bool>("focusOnInputField");
     StateHasChanged();
 }
 
-public async void Complete(TaskItem item)
+public async void Complete(TaskItem task)
 {
-    item.Complete();
-    await SaveItemsInLocalStorage();
+    await Tasks.CompleteTask(task);
 
     if (!Tasks.HasIncompleteTasks)
     {
@@ -317,10 +294,9 @@ public async void Complete(TaskItem item)
     StateHasChanged();
 }
 
-public async void Incomplete(TaskItem item)
+public async void Incomplete(TaskItem task)
 {
-    item.Incomplete();
-    await SaveItemsInLocalStorage();
+    await Tasks.IncompleteTask(task);
 
     if (!Tasks.HasCompleteTasks)
     {
@@ -350,13 +326,12 @@ public async void Delete(TaskItem item)
             CurrentItem = null;
             CurrentInput = null;
         }
-        Tasks.Remove(item);
+        await Tasks.Remove(item);
     }
     catch (Exception ex)
     {
         Console.WriteLine(ex);
     }
-    await SaveItemsInLocalStorage();
 
     if (!Tasks.HasAnyTasks)
     {
@@ -406,9 +381,7 @@ public async void Import(string fileData)
     }
     if (items.Count > 0)
     {
-
-        Tasks.SetTasks(items);
-        await SaveItemsInLocalStorage();
+        await Tasks.SetTasks(items);
         await SelectProject(null);
         StateHasChanged();
     }

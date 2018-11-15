@@ -3,6 +3,7 @@ using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Do.Services
 {
@@ -10,13 +11,21 @@ namespace Do.Services
     {
         private List<TaskItem> _todoItems;
 
+        private const string DoKey = "do";
+
         public static string NoProject { get; } = "No project";
 
         public static string CompletedTasks { get; } = "Completed tasks";
 
-        public void SetTasks(List<TaskItem> tasks)
+        public async Task Init()
+        {
+            await GetTasksFromLocalStorage();
+        }
+
+        public async Task SetTasks(List<TaskItem> tasks)
         {
             _todoItems = tasks;
+            await SaveItemsInLocalStorage();
         }
 
         public void SetTasks(object json)
@@ -35,18 +44,33 @@ namespace Do.Services
             }
         }
 
-        public void Add(TaskItem task)
+        public async Task Add(TaskItem task)
         {
             if (_todoItems == null)
             {
                 _todoItems = new List<TaskItem>();
             }
             _todoItems.Add(task);
+
+            await SaveItemsInLocalStorage();
         }
 
-        public void Remove(TaskItem task)
+        public async Task Remove(TaskItem task)
         {
             _todoItems?.Remove(task);
+            await SaveItemsInLocalStorage();
+        }
+
+        public async Task CompleteTask(TaskItem task)
+        {
+            task.Complete();
+            await SaveItemsInLocalStorage();
+        }
+
+        public async Task IncompleteTask(TaskItem task)
+        {
+            task.Incomplete();
+            await SaveItemsInLocalStorage();
         }
 
         public bool HasAnyTasks
@@ -163,7 +187,7 @@ namespace Do.Services
             }
         }
 
-        public string JsonString
+        private string JsonString
         {
             get
             {
@@ -197,6 +221,21 @@ namespace Do.Services
                 return null;
             }
             return output;
+        }
+
+        private async Task SaveItemsInLocalStorage()
+        {
+            if (!string.IsNullOrWhiteSpace(JsonString))
+            {
+                await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { DoKey, JsonString });
+            }
+        }
+
+
+        private async Task GetTasksFromLocalStorage()
+        {
+            object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { DoKey });
+            SetTasks(json);
         }
     }
 }
