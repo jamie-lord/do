@@ -57,19 +57,34 @@
                     </button>
                     <div class="dropdown-menu">
                         <h6 class="dropdown-header">Priority</h6>
-                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "A")); })">
-                            <span class="badge badge-danger">A</span>
-                        </button>
-                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "B")); })">
-                            <span class="badge badge-warning">B</span>
-                        </button>
-                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "C")); })">
-                            <span class="badge badge-info">C</span>
-                        </button>
-                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "D")); })">
-                            <span class="badge badge-primary">D</span>
-                        </button>
-                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, null)); })">None</button>
+                        @if (Task.Priority != "A")
+                        {
+                            <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "A")); })">
+                                <span class="badge badge-danger">A</span>
+                            </button>
+                        }
+                        @if (Task.Priority != "B")
+                        {
+                            <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "B")); })">
+                                <span class="badge badge-warning">B</span>
+                            </button>
+                        }
+                        @if (Task.Priority != "C")
+                        {
+                            <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "C")); })">
+                                <span class="badge badge-info">C</span>
+                            </button>
+                        }
+                        @if (Task.Priority != "D")
+                        {
+                            <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "D")); })">
+                                <span class="badge badge-primary">D</span>
+                            </button>
+                        }
+                        @if (Task.Priority != null)
+                        {
+                            <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, null)); })">None</button>
+                        }
                         <div class="dropdown-divider"></div>
                         @if (Project == TaskService.CompletedTasks)
                         {
