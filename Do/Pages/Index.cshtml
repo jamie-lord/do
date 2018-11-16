@@ -87,7 +87,7 @@
                     <div class="list-group">
                         @foreach (TaskItem task in Tasks.TasksForProject(project))
                         {
-                            <TaskComponent Task="@task" Project="@project" Complete="@((t) => Complete(t))" Incomplete="@((t) => Incomplete(t))" Edit="@((t) => Edit(t))" Delete="@((t) => Delete(t))" />
+                            <TaskComponent Task="@task" Project="@project" Complete="@((t) => Complete(t))" Incomplete="@((t) => Incomplete(t))" Edit="@((t) => Edit(t))" Delete="@((t) => Delete(t))" Priority="@((p) => SetTaskPriority(p))" />
                         }
                     </div>
                 </div>
@@ -306,6 +306,11 @@ public async void Incomplete(TaskItem task)
     await UpdatePageTitle();
     await JSRuntime.Current.InvokeAsync<bool>("looseFocus");
     StateHasChanged();
+}
+
+public async void SetTaskPriority((TaskItem, string) p)
+{
+    await Tasks.SetTaskPriority(p.Item1, p.Item2);
 }
 
 public async void Edit(TaskItem item)

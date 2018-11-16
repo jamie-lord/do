@@ -73,6 +73,12 @@ namespace Do.Services
             await SaveItemsInLocalStorage();
         }
 
+        public async Task SetTaskPriority(TaskItem task, string priority)
+        {
+            task.Priority = priority;
+            await SaveItemsInLocalStorage();
+        }
+
         public bool HasAnyTasks
         {
             get

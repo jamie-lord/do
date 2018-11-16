@@ -17,7 +17,21 @@
                 <p style="margin-bottom: 0;">
                     @if (!string.IsNullOrWhiteSpace(Task.Priority))
                     {
-                        <span class="badge badge-primary">@Task.Priority</span>
+                        switch (Task.Priority)
+                        {
+                            case "A":
+                                <span class="badge badge-danger">@Task.Priority</span>
+                                break;
+                            case "B":
+                                <span class="badge badge-warning">@Task.Priority</span>
+                                break;
+                            case "C":
+                                <span class="badge badge-info">@Task.Priority</span>
+                                break;
+                            default:
+                                <span class="badge badge-primary">@Task.Priority</span>
+                                break;
+                        }
                     }
                     @Task.Body
                 </p>
@@ -42,6 +56,21 @@
                         <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu">
+                        <h6 class="dropdown-header">Priority</h6>
+                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "A")); })">
+                            <span class="badge badge-danger">A</span>
+                        </button>
+                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "B")); })">
+                            <span class="badge badge-warning">B</span>
+                        </button>
+                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "C")); })">
+                            <span class="badge badge-info">C</span>
+                        </button>
+                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, "D")); })">
+                            <span class="badge badge-primary">D</span>
+                        </button>
+                        <button class="dropdown-item" onclick="@(() => { Priority?.Invoke((Task, null)); })">None</button>
+                        <div class="dropdown-divider"></div>
                         @if (Project == TaskService.CompletedTasks)
                         {
                             <button class="dropdown-item" onclick="@(() => { Incomplete?.Invoke(Task); })">
@@ -79,4 +108,7 @@ private Action<TaskItem> Edit { get; set; }
 
 [Parameter]
 private Action<TaskItem> Delete { get; set; }
+
+[Parameter]
+private Action<(TaskItem, string)> Priority { get; set; }
 }
