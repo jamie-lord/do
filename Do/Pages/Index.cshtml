@@ -6,7 +6,7 @@
 @inject TaskService Tasks
 
 <nav id="sidebar" class="@SidebarActive">
-    <div class="sidebar-header">
+    <div class="sidebar-header" onclick="@(async () => { await SelectProject(null); })">
         <h3>Do</h3>
     </div>
 
@@ -16,7 +16,7 @@
             @foreach (string project in Tasks.Projects)
             {
                 <li class="@ProjectActive(project)">
-                    <a role="button" onclick="@(async () => { await SelectProject(project); })">@project <span class="badge badge-secondary">@Tasks.TasksForProject(project).Count()</span></a>
+                    <a role="button" onclick="@(async () => { await SelectProject(project); })">@project<span class="badge badge-secondary">@Tasks.TasksForProject(project).Count()</span></a>
                 </li>
             }
         </ul>

@@ -157,6 +157,10 @@ a:focus {
         margin-left: -250px;
     }
 
+    .sidebar-header {
+        cursor: pointer;
+    }
+
     #sidebar .sidebar-header {
         padding: 20px;
     }
