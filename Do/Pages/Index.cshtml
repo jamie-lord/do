@@ -16,7 +16,7 @@
             @foreach (string project in Tasks.Projects)
             {
                 <li class="@ProjectActive(project)">
-                    <a role="button" onclick="@(async () => { await SelectProject(project); })">@project<span class="badge badge-secondary">@Tasks.TasksForProject(project).Count()</span></a>
+                    <a role="button" onclick="@(async () => { await SelectProject(project); })">@project<span class="badge badge-secondary float-right">@Tasks.TasksForProject(project).Count()</span></a>
                 </li>
             }
         </ul>
