@@ -157,37 +157,37 @@ a:focus {
         margin-left: -250px;
     }
 
-    .sidebar-header {
+.sidebar-header {
+    cursor: pointer;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+}
+
+#sidebar ul p {
+    padding: 10px;
+}
+
+#sidebar ul li > div {
+    padding: 10px;
+    font-size: 1.1em;
+    display: block;
+}
+
+    #sidebar ul li > div:hover {
+        background: #fff;
         cursor: pointer;
     }
 
-    #sidebar .sidebar-header {
-        padding: 20px;
-    }
-
-    #sidebar ul.components {
-        padding: 20px 0;
-    }
-
-    #sidebar ul p {
-        padding: 10px;
-    }
-
-    #sidebar ul li a, #sidebar ul li label {
-        padding: 10px;
-        font-size: 1.1em;
-        display: block;
-    }
-
-        #sidebar ul li a:hover, #sidebar ul li label:hover {
-            background: #fff;
-            cursor: pointer;
-        }
-
-    #sidebar ul li.active > a,
-    a[aria-expanded="true"] {
-        background: #e2e6ea;
-    }
+#sidebar ul li.active > div,
+div[aria-expanded="true"] {
+    background: #e2e6ea;
+}
 
 a[data-toggle="collapse"] {
     position: relative;

@@ -193,6 +193,16 @@ namespace Do.Services
             }
         }
 
+        public int CompletedTaskCountForProject(string project)
+        {
+            int count = 0;
+            foreach (TaskItem completedTask in CompleteTasks.Where(x => x.Project.Contains(project)))
+            {
+                count++;
+            }
+            return count;
+        }
+
         private string JsonString
         {
             get

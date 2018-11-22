@@ -16,7 +16,12 @@
             @foreach (string project in Tasks.Projects)
             {
                 <li class="@ProjectActive(project)">
-                    <a role="button" onclick="@(async () => { await SelectProject(project); })">@project<span class="badge badge-secondary float-right">@Tasks.TasksForProject(project).Count()</span></a>
+                    <div class="d-flex" onclick="@(async () => { await SelectProject(project); })">
+                        <a role="button" class="text-truncate">@project</a>
+                        <div class="ml-auto">
+                            <span class="badge badge-secondary">@Tasks.TasksForProject(project).Count()</span>
+                        </div>
+                    </div>
                 </li>
             }
         </ul>
@@ -24,16 +29,22 @@
 
     <ul class="list-unstyled components">
         <li>
-            <label style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
+            <div>
+                <label style="margin-bottom: 0px;" id="import-button">Import<input type="file" style="display: none;"></label>
+            </div>
         </li>
         @if (Tasks.HasAnyTasks)
         {
             <li>
-                <a onclick="@Export">Export</a>
+                <div>
+                    <a onclick="@Export">Export</a>
+                </div>
             </li>
         }
         <li>
-            <a data-toggle="modal" data-target="#helpModal">Help</a>
+            <div>
+                <a data-toggle="modal" data-target="#helpModal">Help</a>
+            </div>
         </li>
     </ul>
 
@@ -72,17 +83,23 @@
                 <div class="project-group">
                     @if (!string.IsNullOrWhiteSpace(project) && project != TaskService.NoProject)
                     {
-                        <h4 style="display: inline-block;">
-                            @project
-                            @if (project != TaskService.CompletedTasks)
+                        <div class="d-flex">
+                            <h4>
+                                @project
+                                @if (project != TaskService.CompletedTasks)
+                                {
+                                    <small>
+                                        <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </small>
+                                }
+                            </h4>
+                            @if (project != TaskService.CompletedTasks && Tasks.CompletedTaskCountForProject(project) > 0)
                             {
-                                <small>
-                                    <a onclick="@(() => { NewItemForProject(project); })" role="button" href="" style="color: #6c757d;">
-                                        <i class="fas fa-plus"></i>
-                                    </a>
-                                </small>
+                                <p class="ml-auto">@Tasks.CompletedTaskCountForProject(project)/@(Tasks.TasksForProject(project).Count() + Tasks.CompletedTaskCountForProject(project)) Complete</p>
                             }
-                        </h4>
+                        </div>
                     }
                     <div class="list-group">
                         @foreach (TaskItem task in Tasks.TasksForProject(project))
