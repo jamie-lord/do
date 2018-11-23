@@ -1,7 +1,7 @@
 ﻿@using Models;
 @using Services;
 
-<div class="list-group-item">
+<div class="list-group-item @TaskContextualClass">
     <div class="container-fluid">
         <div class="row">
             @if (Project != TaskService.CompletedTasks)
@@ -28,8 +28,11 @@
                             case "C":
                                 <span class="badge badge-info">@Task.Priority</span>
                                 break;
-                            default:
+                            case "D":
                                 <span class="badge badge-primary">@Task.Priority</span>
+                                break;
+                            default:
+                                <span class="badge badge-secondary">@Task.Priority</span>
                                 break;
                         }
                     }
@@ -126,4 +129,24 @@ private Action<TaskItem> Delete { get; set; }
 
 [Parameter]
 private Action<(TaskItem, string)> Priority { get; set; }
+
+private string TaskContextualClass
+{
+    get
+    {
+        switch (Task.Priority)
+        {
+            case "A":
+                return "list-group-item-danger";
+            case "B":
+                return "list-group-item-warning";
+            case "C":
+                return "list-group-item-info";
+            case "D":
+                return "list-group-item-primary";
+            default:
+                return string.Empty;
+        }
+    }
+}
 }

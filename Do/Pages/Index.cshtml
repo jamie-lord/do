@@ -101,7 +101,7 @@
                             }
                         </div>
                     }
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         @foreach (TaskItem task in Tasks.TasksForProject(project))
                         {
                             <TaskComponent Task="@task" Project="@project" Complete="@((t) => Complete(t))" Incomplete="@((t) => Incomplete(t))" Edit="@((t) => Edit(t))" Delete="@((t) => Delete(t))" Priority="@((p) => SetTaskPriority(p))" />
