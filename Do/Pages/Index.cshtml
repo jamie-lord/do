@@ -275,7 +275,9 @@ public async void AddItem()
         // Editing existing task
         if (CurrentItem != null)
         {
-            CurrentItem.FromLine(CurrentInput);
+            TaskItem newTask = new TaskItem();
+            newTask.FromLine(CurrentInput);
+            await Tasks.Update(CurrentItem, newTask);
         }
         // New task
         else

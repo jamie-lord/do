@@ -55,6 +55,20 @@ namespace Do.Services
             await SaveItemsInLocalStorage();
         }
 
+        public async Task Update(TaskItem oldTask, TaskItem newTask)
+        {
+            int index = _todoItems.IndexOf(oldTask);
+
+            if (index == -1)
+            {
+                Console.WriteLine("Task couldn't be updated as it does not already exist");
+                return;
+            }
+
+            _todoItems[index] = newTask;
+            await SaveItemsInLocalStorage();
+        }
+
         public async Task Remove(TaskItem task)
         {
             _todoItems?.Remove(task);
