@@ -61,7 +61,7 @@ namespace Do.Services
 
             if (index == -1)
             {
-                Console.WriteLine("Task couldn't be updated as it does not already exist");
+                Console.WriteLine("Task couldn't be updated as it does not exist");
                 return;
             }
 
@@ -257,6 +257,7 @@ namespace Do.Services
         {
             if (!string.IsNullOrWhiteSpace(JsonString))
             {
+                Console.WriteLine("Saving tasks to local storage");
                 await JSRuntime.Current.InvokeAsync<bool>("storeInLocal", new object[] { DoKey, JsonString });
             }
         }
@@ -264,6 +265,7 @@ namespace Do.Services
 
         private async Task GetTasksFromLocalStorage()
         {
+            Console.WriteLine("Getting tasks from local storage");
             object json = await JSRuntime.Current.InvokeAsync<object>("getFromLocal", new object[] { DoKey });
             SetTasks(json);
         }

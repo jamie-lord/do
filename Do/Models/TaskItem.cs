@@ -32,28 +32,6 @@ namespace Do.Models
             Project = t.Project;
         }
 
-        public void Update(string line)
-        {
-            var t = TodoTxt.Parse(line);
-            if (!string.IsNullOrWhiteSpace(t.Body))
-            {
-                Body = t.Body;
-            }
-            Completed = t.Completed;
-            if (t.Completion != null)
-            {
-                Completion = t.Completion;
-            }
-            Context = t.Context;
-            if (t.Creation != null)
-            {
-                Creation = t.Creation;
-            }
-            Meta = t.Meta;
-            Priority = t.Priority;
-            Project = t.Project;
-        }
-
         public void Complete()
         {
             Completed = true;
