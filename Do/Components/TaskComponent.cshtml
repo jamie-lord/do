@@ -15,27 +15,7 @@
 
             <div class="col">
                 <p style="margin-bottom: 0;">
-                    @if (!string.IsNullOrWhiteSpace(Task.Priority))
-                    {
-                        switch (Task.Priority)
-                        {
-                            case "A":
-                                <span class="badge badge-danger">@Task.Priority</span>
-                                break;
-                            case "B":
-                                <span class="badge badge-warning">@Task.Priority</span>
-                                break;
-                            case "C":
-                                <span class="badge badge-info">@Task.Priority</span>
-                                break;
-                            case "D":
-                                <span class="badge badge-primary">@Task.Priority</span>
-                                break;
-                            default:
-                                <span class="badge badge-secondary">@Task.Priority</span>
-                                break;
-                        }
-                    }
+                    @PriorityBadge
                     @Task.Body
                 </p>
                 <p class="task-meta">
@@ -53,7 +33,6 @@
             </div>
 
             <div class="col-md-auto my-auto col-trailing">
-
                 <div class="dropleft">
                     <button type="button" class="btn btn-task-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-ellipsis-h"></i>
@@ -147,6 +126,41 @@ private string TaskContextualClass
             default:
                 return string.Empty;
         }
+    }
+}
+
+private RenderFragment PriorityBadge
+{
+    get
+    {
+        if (!string.IsNullOrWhiteSpace(Task.Priority))
+        {
+
+            string badgeClass = "secondary";
+            switch (Task.Priority)
+            {
+                case "A":
+                    badgeClass = "danger";
+                    break;
+                case "B":
+                    badgeClass = "warning";
+                    break;
+                case "C":
+                    badgeClass = "info";
+                    break;
+                case "D":
+                    badgeClass = "primary";
+                    break;
+            }
+            return builder =>
+            {
+                builder.OpenElement(0, "span");
+                builder.AddAttribute(0, "class", $"badge badge-{badgeClass}");
+                builder.AddContent(0, Task.Priority);
+                builder.CloseElement();
+            };
+        }
+        return null;
     }
 }
 }
