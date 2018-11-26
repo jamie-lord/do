@@ -5,7 +5,7 @@
 @using Services
 @inject TaskService Tasks
 
-<nav id="sidebar" class="@SidebarActive">
+<aside id="sidebar" class="@SidebarActive">
     <div class="sidebar-header" onclick="@(async () => { await SelectProject(null); })">
         <h3>Do</h3>
     </div>
@@ -43,9 +43,9 @@
     </ul>
 
     <p class="version-number"><a href="https://github.com/jamie-lord/do" target="_blank" title="View source code and report bugs"><i class="fab fa-github"></i></a> <small>v0.11.0</small></p>
-</nav>
+</aside>
 
-<div id="content" class="@SidebarActive">
+<section id="content" class="@SidebarActive">
     <div class="row section-row">
         <div class="col">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -126,7 +126,7 @@
         </div>
     </div>
 
-</div>
+</section>
 
 @functions {
 public string SidebarActive { get; private set; } = null;

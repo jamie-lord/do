@@ -145,7 +145,8 @@ a:focus {
 #sidebar {
     width: 250px;
     position: fixed;
-    top: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
     left: 0;
     height: 100vh;
     z-index: 999;
