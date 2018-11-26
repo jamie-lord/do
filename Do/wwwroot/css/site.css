@@ -173,13 +173,13 @@ a:focus {
     padding: 10px;
 }
 
-#sidebar ul li > div {
+#sidebar ul li > div, #sidebar ul li > label {
     padding: 10px;
     font-size: 1.1em;
     display: block;
 }
 
-    #sidebar ul li > div:hover {
+    #sidebar ul li > div:hover, #sidebar ul li > label:hover {
         background: #fff;
         cursor: pointer;
     }
