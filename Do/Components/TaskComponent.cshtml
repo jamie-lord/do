@@ -1,5 +1,6 @@
 ﻿@using Models;
 @using Services;
+@using Humanizer;
 
 <div class="list-group-item @TaskContextualClass">
     <div class="container-fluid">
@@ -20,7 +21,14 @@
                 </p>
                 <p class="task-meta">
                     <small>
-                        @Task.Creation?.ToString("yyyy-MM-dd")
+                        @if (Task.Creation != null)
+                        {
+                            @Task.Creation.Humanize();
+                        }
+                        @if (Task.Completion != null)
+                        {
+                            @Task.Completion.Humanize();
+                        }
                         @if (Task.Context != null && Task.Context.Count > 0)
                         {
                             foreach (var context in Task.Context.OrderBy(x => x))
