@@ -1,9 +1,10 @@
 ﻿@page "/"
 @using Microsoft.JSInterop;
 @using System.IO;
+@using System.Text.RegularExpressions;
 @using Models;
-@using Services
-@inject TaskService Tasks
+@using Services;
+@inject TaskService Tasks;
 
 <aside id="sidebar" class="@SidebarActive">
     <div class="sidebar-header" onclick="@(async () => { await SelectProject(null); })">
@@ -17,7 +18,7 @@
             {
                 <li class="@ProjectActive(project)">
                     <div class="d-flex" onclick="@(async () => { await SelectProject(project); })">
-                        <a role="button" class="text-truncate">@project</a>
+                        <a role="button" class="text-truncate">@ProjectDisplayValue(project)</a>
                         <div class="ml-auto">
                             <span class="badge badge-secondary">@Tasks.TasksForProject(project).Count()</span>
                         </div>
@@ -79,7 +80,7 @@
                     {
                         <div class="d-flex">
                             <h4>
-                                @project
+                                @ProjectDisplayValue(project)
                                 @if (project != TaskService.CompletedTasks)
                                 {
                                     <small>
@@ -367,6 +368,11 @@ public async void ClearInput()
     CurrentItem = null;
     InputButtonText = "Save";
     await JSRuntime.Current.InvokeAsync<bool>("looseFocus");
+}
+
+public string ProjectDisplayValue(string project)
+{
+    return Regex.Replace(project, "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))", "$1 ");
 }
 
 [JSInvokable]
