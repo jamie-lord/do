@@ -15,29 +15,29 @@
             }
 
             <div class="col">
-                <p style="margin-bottom: 0;">
+                <h5 style="margin-bottom: 0;">
                     @PriorityBadge
                     @Task.Body
-                </p>
-                <p class="task-meta">
-                    <small>
-                        @if (Task.Creation != null)
+                </h5>
+                <div class="task-meta">
+                    @if (Task.Creation != null)
+                    {
+                        <span>Created @Task.Creation.Humanize()</span>
+                    }
+
+                    @if (Task.Completion != null)
+                    {
+                        <span>Completed @Task.Completion.Humanize()</span>
+                    }
+
+                    @if (Task.Context != null && Task.Context.Count > 0)
+                    {
+                        foreach (var context in Task.Context.OrderBy(x => x))
                         {
-                            @Task.Creation.Humanize();
+                            <span class="badge badge-secondary">@context</span>
                         }
-                        @if (Task.Completion != null)
-                        {
-                            @Task.Completion.Humanize();
-                        }
-                        @if (Task.Context != null && Task.Context.Count > 0)
-                        {
-                            foreach (var context in Task.Context.OrderBy(x => x))
-                            {
-                                <span class="badge badge-secondary">@context</span>
-                            }
-                        }
-                    </small>
-                </p>
+                    }
+                </div>
             </div>
 
             <div class="col-md-auto my-auto col-trailing">
